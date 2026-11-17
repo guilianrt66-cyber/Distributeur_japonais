@@ -1006,9 +1006,10 @@ function buildSnow() {
   for (let x = -10; x <= 1610; x += 12) d += ` L${x} ${(830 - hAt(x) - rnd() * 2.5).toFixed(1)}`;
   // bord avant irrégulier : la neige déborde un peu sur la route, par vagues
   d += " L1610 852";
-  for (let x = 1610; x >= -10; x -= 18) {
-    const bump = 8 * Math.sin(x / 47) + 6 * Math.sin(x / 13 + 1) + rnd() * 5;
-    d += ` Q${x - 9} ${(858 + bump + 6).toFixed(1)} ${x - 18} ${(852 + bump).toFixed(1)}`;
+  for (let x = 1610; x > -10; ) {
+    const step = 25 + rnd() * 45, bump = rnd() * 2.5;
+    d += ` Q${(x - step / 2).toFixed(1)} ${(853 + bump + 1.5).toFixed(1)} ${(x - step).toFixed(1)} ${(852 + bump * .5).toFixed(1)}`;
+    x -= step;
   }
   add(d + " Z");
   // plaques de neige et neige tassée sur la route
