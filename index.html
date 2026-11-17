@@ -211,8 +211,8 @@
   @keyframes tail { 50% { transform: rotate(-14deg); } }
   #neons > g { transition: filter .2s; }
   #neons > g:hover { filter: brightness(1.8) saturate(1.3); }
-  #shrine, #msg-building { cursor: pointer; }
-  #shrine:hover { filter: brightness(1.35); }
+  #gacha, #msg-building { cursor: pointer; }
+  #gacha:hover { filter: brightness(1.25); }
   #scene-machine:hover { filter: brightness(1.08); }
   .product:hover svg { filter: drop-shadow(0 0 6px rgba(255,255,255,.95)) brightness(1.12); }
   .tip { position: fixed; z-index: 65; pointer-events: none; background: rgba(8,10,18,.92); border: 1px solid rgba(111,211,255,.35); color: #e8ecf5; font-size: 12px; padding: 4px 9px; border-radius: 8px; white-space: nowrap; transform: translate(-50%, -140%); }
@@ -285,8 +285,8 @@
   <polygon points="835,830 1000,690 1160,690 1350,830" fill="#111218"/>
   <path d="M835 300 L1000 488 M835 360 L1000 509 M835 420 L1000 530 M835 480 L1000 551 M835 540 L1000 572 M835 600 L1000 594 M835 660 L1000 615 M835 720 L1000 636 M835 780 L1000 657 M1350 260 L1160 501 M1350 330 L1160 520 M1350 400 L1160 539 M1350 470 L1160 558 M1350 540 L1160 577 M1350 610 L1160 595 M1350 680 L1160 614 M1350 750 L1160 633 M1350 810 L1160 649 M870 289 L870 800 M905 338 L905 771 M938 384 L938 743 M968 425 L968 717 M1310 257 L1310 801 M1270 314 L1270 771 M1232 368 L1232 743 M1195 420 L1195 716" stroke="#ffffff" stroke-opacity=".045" stroke-width="2" fill="none"/>
   <g fill="#000" opacity=".5" filter="url(#contact)">
-    <ellipse cx="918" cy="791" rx="34" ry="4"/><ellipse cx="948" cy="792" rx="5" ry="2"/><ellipse cx="968" cy="792" rx="5" ry="2"/>
-    <ellipse cx="960" cy="727" rx="22" ry="3"/><ellipse cx="1218" cy="763" rx="24" ry="4"/>
+    <ellipse cx="910" cy="793" rx="26" ry="4"/><ellipse cx="955" cy="791" rx="14" ry="3"/><ellipse cx="977" cy="773" rx="9" ry="2"/>
+    <ellipse cx="957" cy="727" rx="13" ry="2.5"/><ellipse cx="1218" cy="763" rx="24" ry="4"/>
     <ellipse cx="1262" cy="830" rx="26" ry="4"/><ellipse cx="1289" cy="831" rx="20" ry="3"/><ellipse cx="1316" cy="831" rx="20" ry="3"/>
     <ellipse cx="545" cy="831" rx="70" ry="5"/><ellipse cx="702" cy="831" rx="90" ry="5"/><ellipse cx="805" cy="831" rx="22" ry="4"/>
     <ellipse cx="213" cy="829" rx="55" ry="4"/><ellipse cx="352" cy="831" rx="60" ry="4"/>
@@ -312,7 +312,7 @@
   <text x="849" y="556" font-size="8" fill="#fff" text-anchor="middle" font-family="Zen Maru Gothic, sans-serif">深夜町</text>
   <text x="849" y="571" font-size="9" fill="#fff" text-anchor="middle" font-family="DotGothic16, monospace">2-4</text>
   <!-- grille d'aération -->
-  <rect x="905" y="585" width="22" height="16" fill="#2a2d35"/><path d="M907 589 H925 M907 593 H925 M907 597 H925" stroke="#14151a" stroke-width="1.5"/>
+  <polygon points="900,470 925,485.8 925,503.2 900,490" fill="#2a2d35"/><path d="M902 474 L923 487.0 M902 478 L923 490.5 M902 482 L923 494.1 M902 486 L923 497.6" stroke="#14151a" stroke-width="1.5"/>
   <!-- poubelles -->
   <path d="M1242 829 Q1237 806 1255 801 Q1261 796 1267 801 Q1284 806 1280 829 Z" fill="#cfd8df" opacity=".9"/>
   <path d="M1261 801 q-4 -6 0 -6 q4 0 0 6" fill="#cfd8df"/>
@@ -322,7 +322,7 @@
   <!-- ruelle : mur gauche -->
   <polygon points="944,566 968,552 968,574 944,588" fill="#62666f"/><circle cx="956" cy="570" r="7" fill="#2b2f37"/>
   <polygon points="970,712 988,697 988,632 970,643" fill="#2e2219"/>
-  <g>
+  <g transform="translate(955 726) scale(.6) translate(-955 -726)">
     <polygon points="971,709 971,726 981.7,713.8 981.7,698.3" fill="#9c7414"/>
     <rect x="939" y="709" width="32" height="17" rx="1.5" fill="#d9a321"/>
     <path d="M945 711 V724 M951 711 V724 M957 711 V724 M963 711 V724" stroke="#a87a10" stroke-width="1.5"/>
@@ -417,6 +417,10 @@
     <ellipse cx="0" cy="-20" rx="15" ry="20" fill="#050507"/>
     <circle cx="0" cy="-44" r="11" fill="#050507"/>
     <path d="M-10 -50 L-9 -63 L-2 -53 Z M10 -50 L9 -63 L2 -53 Z" fill="#050507"/>
+    <g id="cat-hat" display="none">
+      <path d="M-12 -52 Q0 -58 12 -52 L4 -70 Q-1 -79 -9 -67 Z" fill="#c8242c"/>
+      <ellipse cx="0" cy="-52" rx="13" ry="3.5" fill="#f4f8ff"/><circle cx="-9" cy="-68" r="3.5" fill="#f4f8ff"/>
+    </g>
     <g id="cat-eyes"><g class="blink-eyes"><ellipse cx="-4" cy="-45" rx="2.4" ry="2" fill="#d6ff6a" filter="url(#glow)"/><ellipse cx="4" cy="-45" rx="2.4" ry="2" fill="#d6ff6a" filter="url(#glow)"/></g></g>
   </g>
   <!-- parapluie transparent oublié -->
@@ -424,19 +428,29 @@
   <line x1="470" y1="748" x2="470" y2="830" stroke="#cfd6de" stroke-width="2"/>
   <path d="M470 748 q0 -9 -7 -8" stroke="#cfd6de" stroke-width="2.5" fill="none"/>
   <!-- vapeur -->
-  <g class="steam"><circle cx="916" cy="582" r="6" fill="#dfe7f0"/><circle cx="912" cy="582" r="7" fill="#dfe7f0" style="animation-delay:-1.3s"/><circle cx="920" cy="582" r="5" fill="#dfe7f0" style="animation-delay:-2.6s"/></g>
-  <!-- petit sanctuaire -->
-  <g id="shrine">
-    <circle cx="930" cy="768" r="46" fill="url(#rglow)" opacity=".45"/>
-    <polygon points="890,768 934,768 947,754 906,754" fill="#7a7c84"/><polygon points="934,768 934,790 946.5,774.0 946.5,753.8" fill="#45474e"/>
-    <rect x="890" y="768" width="44" height="22" fill="#5d5f66"/>
-    <polygon points="928,742 928,768 939.3,755.5 939.3,731.4" fill="#4a2c18"/>
-    <rect x="896" y="742" width="32" height="26" fill="#6b4226"/><rect x="904" y="750" width="16" height="18" fill="#2a160c"/>
-    <path d="M888 745 L912 728 L936 745 Z" fill="#26282e"/>
-    <circle cx="900" cy="764" r="2.5" fill="#ffcf70" filter="url(#glow)" class="neon-flicker"/><circle cx="924" cy="764" r="2.5" fill="#ffcf70" filter="url(#glow)"/>
-    <g fill="#c8242c"><rect x="946" y="758" width="4" height="34"/><rect x="966" y="758" width="4" height="34"/><rect x="940" y="752" width="36" height="5" rx="1"/><rect x="944" y="763" width="28" height="3"/></g>
-    <rect x="940" y="750" width="36" height="2" fill="#111"/>
-    <rect x="880" y="720" width="105" height="80" fill="transparent"/>
+  <g class="steam"><circle cx="913" cy="474" r="6" fill="#dfe7f0"/><circle cx="909" cy="474" r="7" fill="#dfe7f0" style="animation-delay:-1.3s"/><circle cx="917" cy="474" r="5" fill="#dfe7f0" style="animation-delay:-2.6s"/></g>
+  <!-- machine à capsules (gachapon) + plantes en pot -->
+  <g id="gacha">
+    <polygon points="926,708 926,792 937.5,777.9 937.5,699.7" fill="#8f1726"/>
+    <rect x="890" y="748" width="36" height="44" fill="#d3263a"/>
+    <rect x="891" y="712" width="34" height="36" rx="4" fill="#dff0ff" opacity=".35" stroke="#e8eef5" stroke-width="1.5"/>
+    <rect x="893" y="714" width="30" height="32" rx="3" fill="#ffffff" opacity=".12"/>
+    <g><circle cx="899" cy="740" r="4.5" fill="#ff7c9a"/><circle cx="908" cy="741" r="4.5" fill="#ffd84f"/><circle cx="917" cy="740" r="4.5" fill="#7dd3ff"/>
+       <circle cx="903" cy="732" r="4.5" fill="#7dffb0"/><circle cx="912" cy="731" r="4.5" fill="#c49bff"/><circle cx="920" cy="733" r="4" fill="#ff9a3a"/><circle cx="898" cy="725" r="4" fill="#ffd84f"/></g>
+    <rect x="895" y="716" width="3" height="28" rx="1.5" fill="#fff" opacity=".45"/>
+    <rect x="889" y="706" width="38" height="7" rx="2" fill="#d3263a"/>
+    <rect x="893" y="697" width="30" height="10" rx="2" fill="#ffd84f"/>
+    <text x="908" y="705" font-size="7.5" text-anchor="middle" fill="#7a1020" font-family="Zen Maru Gothic, sans-serif" font-weight="700">ガチャ</text>
+    <rect x="895" y="753" width="26" height="15" rx="2" fill="#f2f2f2"/>
+    <circle cx="908" cy="760.5" r="5" fill="#c9cdd3" stroke="#8a9099" stroke-width="1.5"/><path d="M904 760.5 H912" stroke="#6b7078" stroke-width="2"/>
+    <rect x="900" y="776" width="16" height="9" rx="2" fill="#1a1a1a"/>
+    <rect x="880" y="694" width="60" height="100" fill="transparent"/>
+  </g>
+  <g>
+    <polygon points="944,770 966,770 963,790 947,790" fill="#b5653a"/><rect x="942" y="767" width="26" height="4" rx="1" fill="#c97445"/>
+    <circle cx="949" cy="758" r="9" fill="#2f6b3a"/><circle cx="960" cy="755" r="10" fill="#3d8a4a"/><circle cx="954" cy="748" r="9" fill="#357a42"/><circle cx="963" cy="764" r="6" fill="#2f6b3a"/>
+    <polygon points="971,759 984,759 982,772 973,772" fill="#8a5a3a"/>
+    <path d="M974 759 L972 738 L977 757 M978 759 L979 734 L981 758 M981 759 L986 742 L983 759" stroke="#3d8a4a" stroke-width="3" fill="none" stroke-linecap="round"/>
   </g>
   <!-- neige du 24 -->
   <g id="snowcover" display="none"></g>
@@ -550,7 +564,7 @@ const WINDOW_MSG = { 13: "A×G", 24: "2403" };
 // Message affiché avec le code secret (Konami : ↑ ↑ ↓ ↓ ← → ← → B A)
 const SECRET_MSG = "A×G";
 
-/* Les prédictions du petit sanctuaire (clic sur le torii). [kanji, lecture, texte] */
+/* Les prédictions de la machine à capsules dans la ruelle (clic dessus). [kanji, lecture, texte] */
 const OMIKUJI = [
   ["大吉", "daikichi · grande chance", "Aujourd'hui, personne ne te parlera au travail. Savoure."],
   ["中吉", "chūkichi · bonne chance", "Une boisson t'attend dans un distributeur. C'est plus que ce que la plupart des gens auront aujourd'hui."],
@@ -567,7 +581,9 @@ const MUSIC_FILES = {
   machine: "",    // ex : "audio/machine.mp3"   — boucle devant le distributeur
   ouverture: "",  // ex : "audio/ouverture.mp3" — quand une boisson s'ouvre
   fragment: "",   // ex : "audio/fragment.mp3"  — quand un fragment est trouvé
-  final: ""       // ex : "audio/final.mp3"     — le mot de passe du 24
+  final: "",      // ex : "audio/final.mp3"     — le mot de passe du 24
+  rueNoel: "",    // ex : "audio/rue-noel.mp3"     — boucle dans la rue, le 24 seulement (neige)
+  machineNoel: "" // ex : "audio/machine-noel.mp3" — boucle devant le distributeur, le 24 seulement
 };
 
 const INTRO_TEXT = "24 nuits, 24 boissons. Une par jour, pas plus. TODO : ton petit mot d'accueil.";
@@ -759,7 +775,7 @@ const Sound = (() => {
 
   // fichiers audio perso
   const files = {};
-  for (const k in MUSIC_FILES) if (MUSIC_FILES[k]) { const a = new Audio(MUSIC_FILES[k]); a.preload = "auto"; if (k === "rue" || k === "machine") { a.loop = true; a.volume = 0; } a._t = 0; files[k] = a; }
+  for (const k in MUSIC_FILES) if (MUSIC_FILES[k]) { const a = new Audio(MUSIC_FILES[k]); a.preload = "auto"; if (["rue", "machine", "rueNoel", "machineNoel"].includes(k)) { a.loop = true; a.volume = 0; } a._t = 0; files[k] = a; }
   function fadeFile(a, target) {
     if (!a) return; a._t = target; clearInterval(a._f);
     if (target > 0 && a.paused) a.play().catch(() => {});
@@ -770,16 +786,21 @@ const Sound = (() => {
     }, 50);
   }
   function playFile(k) { const a = files[k]; if (!a) return false; const c = a.cloneNode(); c.volume = muted ? 0 : .85; c.play().catch(() => {}); return true; }
-  let rainFactor = 1;
+  let rainFactor = 1, christmas = false;
+  // le 24, on prend la version « Noël » si elle existe
+  const loopFile = k => (christmas && files[k + "Noel"]) || files[k];
+  function setChristmas(v) { if (v === christmas) return; christmas = v; if (ctx) { const m = mode; mode = "off"; setMode(m); } }
   function setRainFactor(f) { rainFactor = f; if (ctx) setMode(mode, true); }
 
   function setMode(m, force) {
     if (!ctx) { mode = m; return; }
     const prev = mode; mode = m;
-    const genStreet = files.rue ? 0 : .5, genMachine = files.machine ? 0 : .55;
-    if (m === "street") { ramp(music.gain, genStreet); ramp(musicLP.frequency, 1700); ramp(rainG.gain, .045 * rainFactor); ramp(humG.gain, 0); ramp(mSend.gain, .12); fadeFile(files.rue, .6); fadeFile(files.machine, 0); }
-    if (m === "machine") { ramp(music.gain, genMachine); ramp(musicLP.frequency, 5000); ramp(rainG.gain, .014 * rainFactor); ramp(humG.gain, .012); ramp(mSend.gain, 0, .3); fadeFile(files.rue, 0); fadeFile(files.machine, .6); }
-    if (m === "quiet") { ramp(music.gain, 0, .5); ramp(rainG.gain, .006 * rainFactor, .5); ramp(humG.gain, .003, .5); fadeFile(files.rue, 0); fadeFile(files.machine, 0); }
+    const R = loopFile("rue"), M = loopFile("machine");
+    [files.rue, files.machine, files.rueNoel, files.machineNoel].forEach(a => { if (a && a !== R && a !== M) fadeFile(a, 0); });
+    const genStreet = R ? 0 : .5, genMachine = M ? 0 : .55;
+    if (m === "street") { ramp(music.gain, genStreet); ramp(musicLP.frequency, 1700); ramp(rainG.gain, .045 * rainFactor); ramp(humG.gain, 0); ramp(mSend.gain, .12); fadeFile(R, .6); fadeFile(M, 0); }
+    if (m === "machine") { ramp(music.gain, genMachine); ramp(musicLP.frequency, 5000); ramp(rainG.gain, .014 * rainFactor); ramp(humG.gain, .012); ramp(mSend.gain, 0, .3); fadeFile(R, 0); fadeFile(M, .6); }
+    if (m === "quiet") { ramp(music.gain, 0, .5); ramp(rainG.gain, .006 * rainFactor, .5); ramp(humG.gain, .003, .5); fadeFile(R, 0); fadeFile(M, 0); }
     if (prev !== m && (m === "street" || m === "machine")) {
       // on coupe net ce qui sonnait encore et on repart sur un bus neuf : plus de musique en double
       const old = music; old.gain.cancelScheduledValues(ctx.currentTime); old.gain.setTargetAtTime(0, ctx.currentTime, .15);
@@ -807,9 +828,16 @@ const Sound = (() => {
 
   function schedule() {
     if (!ctx || (mode !== "street" && mode !== "machine")) return;
-    if ((mode === "street" && files.rue) || (mode === "machine" && files.machine)) { nextT = ctx.currentTime; return; }
+    if ((mode === "street" && loopFile("rue")) || (mode === "machine" && loopFile("machine"))) { nextT = ctx.currentTime; return; }
     while (nextT < ctx.currentTime + .25) {
-      if (mode === "street") {           // lo-fi de nuit, 80 bpm
+      if (mode === "street" && christmas) {   // Noël : accords doux, carillon et grelots
+        const dur = .4, NOEL = [[48, 55, 64, 67], [45, 52, 60, 64], [41, 48, 57, 64], [43, 50, 59, 62]], chord = NOEL[Math.floor(step / 8) % 4];
+        if (step % 8 === 0) { chord.forEach(n => voice("triangle", hz(n), nextT, .03, .6, 3.4)); voice("sine", hz(chord[0] - 12), nextT, .08, .02, 3); }
+        const mel = [76, 79, 84, 79, 76, 72, 74, 76][step % 8] + (Math.floor(step / 8) % 4 === 2 ? -3 : 0);
+        if (step % 2 === 0) { voice("sine", hz(mel + 12), nextT, .045, .003, 1.4); voice("sine", hz(mel + 12) * 3, nextT, .008, .002, .4); }
+        if (step % 2 === 1) noise(nextT, .05, 7000, 2, .12, music);
+        nextT += dur;
+      } else if (mode === "street") {           // lo-fi de nuit, 80 bpm
         const dur = .375, chord = CHORDS[Math.floor(step / 8) % 4];
         if (step % 8 === 0) {
           chord.forEach(n => { voice("triangle", hz(n), nextT, .028, .5, 3.2, music, -6); voice("triangle", hz(n), nextT, .028, .5, 3.2, music, 6); });
@@ -872,6 +900,15 @@ const Sound = (() => {
     g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(.05, t0 + .03); g.gain.setValueAtTime(.02, t0 + .1); g.gain.linearRampToValueAtTime(.05, t0 + .14); g.gain.exponentialRampToValueAtTime(.001, t0 + .4);
     o.connect(f); f.connect(g); g.connect(sfx); o.start(t0); o.stop(t0 + .45);
   }
+  function gacha() {
+    if (!ctx) return; const t0 = ctx.currentTime;
+    for (let i = 0; i < 7; i++) noise(t0 + i * .07, .012, 2600, 3, .5);
+    const o = ctx.createOscillator(), g = ctx.createGain(), t1 = t0 + .65;
+    o.frequency.setValueAtTime(700, t1); o.frequency.exponentialRampToValueAtTime(260, t1 + .12);
+    g.gain.setValueAtTime(.18, t1); g.gain.exponentialRampToValueAtTime(.001, t1 + .15);
+    o.connect(g); g.connect(sfx); o.start(t1); o.stop(t1 + .2);
+    [[.85, 1], [1.02, .5], [1.12, .25]].forEach(([dt, k]) => voice("sine", 900, t0 + dt, .06 * k, .002, .12, sfx));
+  }
   function suzu() {
     if (!ctx) return; const t0 = ctx.currentTime;
     for (let i = 0; i < 9; i++) { const dt = Math.random() * .45; voice("sine", 2300 + Math.random() * 1200, t0 + dt, .035, .002, .35, sfx); }
@@ -882,7 +919,7 @@ const Sound = (() => {
     Object.values(files).forEach(a => { if (a.loop) fadeFile(a, a._t); });
     return muted;
   }
-  return { init, setMode, setRainFactor, clank, beep, bang, jingle, sparkle, finale, meow, buzz, suzu, toggleMute, isMuted: () => muted, mode: () => mode };
+  return { init, setMode, setRainFactor, setChristmas, clank, beep, bang, jingle, sparkle, finale, meow, buzz, suzu, gacha, toggleMute, isMuted: () => muted, mode: () => mode };
 })();
 
 /* =====================================================================
@@ -924,7 +961,7 @@ const FONT = {
   Q:["010","101","101","110","011"],R:["110","101","110","101","101"],S:["011","100","010","001","110"],T:["111","010","010","010","010"],
   U:["101","101","101","101","111"],V:["101","101","101","101","010"],W:["101","101","111","111","101"],X:["101","101","010","101","101"],
   Y:["101","101","010","010","010"],Z:["111","001","010","100","111"],"0":["111","101","101","101","111"],"1":["010","110","010","010","111"],
-  "2":["110","001","010","100","111"],"3":["110","001","010","001","110"],"4":["101","101","111","001","001"],"5":["111","100","110","001","110"],
+  "2":["110","001","010","100","111"],"3":["111","001","011","001","111"],"4":["101","101","111","001","001"],"5":["111","100","110","001","110"],
   "6":["011","100","111","101","111"],"7":["111","001","010","010","010"],"8":["111","101","111","101","111"],"9":["111","101","111","001","110"],
   "×":["000","101","010","101","000"],"♥":["000","101","111","111","010"],"/":["001","001","010","100","100"],"!":["010","010","010","000","010"],
   "?":["110","001","010","000","010"]," ":["000","000","000","000","000"]
@@ -946,15 +983,14 @@ function buildSnow() {
     for (let xx = x + w; xx > x; xx -= 9 + rnd() * 14) d += ` Q${xx - 3} ${y + 3 + rnd() * 4} ${xx - 7} ${y + 1}`;
     add(d + " Z");
   };
-  [[0, 240, 835, 12], [1350, 190, 250, 12], [378, 102, 240, 7], [0, 175, 120, 6], [190, 160, 130, 6], [570, 185, 110, 6], [690, 170, 150, 6], [1180, 120, 90, 6], [1360, 100, 120, 6],
+  [[0, 240, 835, 12], [1350, 190, 250, 12], [378, 102, 240, 7], [0, 175, 120, 6], [190, 160, 130, 6], [628, 190, 70, 6], [690, 170, 150, 6], [1180, 120, 90, 6], [1360, 100, 120, 6],
    [70, 425, 92, 11], [480, 425, 92, 11], [690, 440, 92, 11], [1500, 500, 80, 9], [944, 560, 24, 5], [1250, 597, 35, 6],
    [34, 395, 162, 6], [224, 395, 162, 6], [414, 395, 162, 6], [604, 395, 162, 6],
    [285, 568, 140, 13], [485, 560, 120, 12], [622, 520, 160, 15], [440, 572, 24, 5], [110, 470, 54, 7],
-   [1376, 472, 218, 8], [1298, 777, 34, 10], [1242, 800, 64, 10], [940, 752, 36, 6], [808, 105, 82, 6], [820, 165, 58, 5], [858, 225, 26, 8],
-   [1375, 588, 210, 8], [994, 462, 172, 9], [1016, 498, 128, 5], [941, 693, 29, 5], [1207, 708, 22, 6], [234, 736, 26, 7], [836, 540, 26, 5], [1288, 300, 38, 6], [858, 330, 34, 6]
+   [1376, 472, 218, 8], [1298, 777, 34, 10], [1242, 800, 64, 10], [889, 697, 38, 6], [945, 746, 22, 7], [971, 735, 14, 4], [808, 105, 82, 6], [820, 165, 58, 5], [858, 225, 26, 8],
+   [1375, 588, 210, 8], [994, 462, 172, 9], [1016, 498, 128, 5], [947, 706, 17, 4], [1207, 708, 22, 6], [234, 736, 26, 7], [836, 540, 26, 5], [1288, 300, 38, 6], [858, 330, 34, 6]
   ].forEach(([x, y, w, h]) => cap(x, y, w, h));
   // toit du petit sanctuaire
-  add("M886 746 L912 726 L938 746 L934 748 L912 733 L890 748 Z");
   // tas de neige au sol, plus hauts contre les murs et les machines
   const piles = [[0, 24, 60], [160, 10, 40], [300, 14, 45], [420, 18, 22], [475, 14, 22], [612, 10, 16], [740, 7, 18], [865, 18, 22], [1240, 16, 34], [1335, 18, 22], [1380, 12, 30], [1600, 26, 70]];
   const hAt = x => 4 + piles.reduce((a, [px, ph, pw]) => a + ph * Math.exp(-((x - px) ** 2) / (2 * pw * pw)), 0);
@@ -997,7 +1033,7 @@ function buildStreet() {
 
   // ligne d'immeubles au loin, derrière
   const sk = $("skyline");
-  [[0, 175, 120], [110, 205, 90], [190, 160, 130], [330, 195, 100], [570, 185, 110], [690, 170, 150],
+  [[0, 175, 120], [110, 205, 90], [190, 160, 130], [330, 195, 100], [628, 190, 70], [690, 170, 150],
    [985, 300, 70], [1050, 250, 60], [1105, 330, 70], [1180, 120, 90], [1260, 160, 100], [1360, 100, 120], [1470, 140, 140]].forEach(([x, y, w]) => {
     svgEl("rect", { x, y, width: w, height: 600, fill: "#0b0e1c" }, sk);
   });
@@ -1011,7 +1047,7 @@ function buildStreet() {
     const el = svgEl("rect", { x: 386 + c * 12, y: 118 + r * 15, width: 7, height: 10, fill: "#ffd98f", opacity: .75 }, mg);
     MSG_CELLS.push({ el, r: rnd(), row: r, col: c });
   }
-  [[0, 175, 120], [110, 205, 90], [190, 160, 130], [330, 195, 100], [570, 185, 110], [690, 170, 150]].forEach(([x, y, w]) => {
+  [[0, 175, 120], [110, 205, 90], [190, 160, 130], [330, 195, 100], [628, 190, 70], [690, 170, 150]].forEach(([x, y, w]) => {
     for (let yy = y + 10; yy < 236; yy += 14) for (let xx = x + 8; xx < x + w - 6; xx += 13) if (rnd() > .55) litWindow(lights, xx, yy, 5, 7, rnd() > .4, false);
   });
   [[985, 300, 70], [1050, 250, 60], [1105, 330, 70], [1180, 120, 90], [1260, 160, 100]].forEach(([x, y, w]) => {
@@ -1188,6 +1224,8 @@ function applyTime(day) {
   snowing = day >= 24;
   $("snowcover").setAttribute("display", snowing ? "inline" : "none");
   Sound.setRainFactor(snowing ? .15 : 1);
+  Sound.setChristmas(snowing);
+  $("cat-hat").setAttribute("display", snowing ? "inline" : "none");
 }
 
 /* =====================================================================
@@ -1233,20 +1271,24 @@ function bubble(text, x, y, ms = 1500) {
   document.body.appendChild(b); setTimeout(() => b.remove(), ms + 100);
 }
 function catSpot() { const r = $("cat").getBoundingClientRect(); return [r.left + r.width / 2, r.top - 10]; }
-$("cat").addEventListener("click", () => { Sound.meow(); bubble(t("meow"), ...catSpot()); });
+$("cat").addEventListener("click", () => {
+  Sound.meow();
+  if (snowing) bubble(lang === "fr" ? "Joyeux Noël ✦ miaou" : "メリークリスマス ✦ にゃ", ...catSpot(), 2600);
+  else bubble(t("meow"), ...catSpot());
+});
 addEventListener("mousemove", e => {
   if (inCloseup) return;
   const r = $("cat").getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height * .3;
   const dx = e.clientX - cx, dy = e.clientY - cy, d = Math.hypot(dx, dy) || 1;
   $("cat-eyes").setAttribute("transform", `translate(${(dx / d * 1.6).toFixed(2)} ${(dy / d * 1.2).toFixed(2)})`);
 });
-// sanctuaire : tirer une prédiction
-$("shrine").addEventListener("click", () => {
-  Sound.suzu();
+// gachapon : une capsule, une prédiction
+$("gacha").addEventListener("click", () => {
+  Sound.gacha();
   const roll = Math.random(), k = roll < .12 ? 0 : roll > .92 ? OMIKUJI.length - 1 : 1 + Math.floor(Math.random() * (OMIKUJI.length - 2));
   const [kanji, read, text] = OMIKUJI[k];
   $("ok-kanji").textContent = kanji; $("ok-read").textContent = read; $("ok-text").textContent = text;
-  setTimeout(() => { $("omikuji").hidden = false; }, 700);
+  setTimeout(() => { $("omikuji").hidden = false; }, 1200);
 });
 $("omikuji").addEventListener("click", () => { $("omikuji").hidden = true; });
 // code secret et mots magiques
