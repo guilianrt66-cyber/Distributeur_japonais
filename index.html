@@ -1004,7 +1004,25 @@ function buildSnow() {
   const hAt = x => 4 + piles.reduce((a, [px, ph, pw]) => a + ph * Math.exp(-((x - px) ** 2) / (2 * pw * pw)), 0);
   let d = "M-10 860";
   for (let x = -10; x <= 1610; x += 12) d += ` L${x} ${(830 - hAt(x) - rnd() * 2.5).toFixed(1)}`;
-  add(d + " L1610 860 Z");
+  // bord avant irrégulier : la neige déborde un peu sur la route, par vagues
+  d += " L1610 852";
+  for (let x = 1610; x >= -10; x -= 18) {
+    const bump = 8 * Math.sin(x / 47) + 6 * Math.sin(x / 13 + 1) + rnd() * 5;
+    d += ` Q${x - 9} ${(858 + bump + 6).toFixed(1)} ${x - 18} ${(852 + bump).toFixed(1)}`;
+  }
+  add(d + " Z");
+  // plaques de neige et neige tassée sur la route
+  const road = svgEl("g", { fill: "#e9f0fb" }, g);
+  [[120, 880, 46, 7], [300, 905, 30, 5], [520, 872, 60, 8], [760, 890, 38, 5], [980, 915, 52, 6], [1180, 876, 44, 7], [1420, 898, 60, 8], [1560, 930, 34, 5], [640, 950, 26, 4], [80, 960, 40, 5]]
+    .forEach(([cx, cy, rx, ry]) => {
+      const pts = [];
+      for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2, r = .75 + rnd() * .35; pts.push([cx + Math.cos(a) * rx * r, cy + Math.sin(a) * ry * r]); }
+      let pd = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+      for (let k = 1; k <= pts.length; k++) { const p0 = pts[k - 1], p1 = pts[k % pts.length]; pd += ` Q${p0[0].toFixed(1)} ${p0[1].toFixed(1)} ${((p0[0] + p1[0]) / 2).toFixed(1)} ${((p0[1] + p1[1]) / 2).toFixed(1)}`; }
+      svgEl("path", { d: pd + " Z", opacity: .55 + rnd() * .3 }, road);
+    });
+  // traces de pneus qui ont tassé la neige devant
+  svgEl("path", { d: "M-10 872 Q800 860 1610 874 L1610 879 Q800 866 -10 877 Z M-10 900 Q800 888 1610 902 L1610 906 Q800 893 -10 904 Z", fill: "#cfdbee", opacity: .18 }, road);
   // congères le long des murs de la ruelle
   // congères douces au pied des murs de la ruelle : dessinées sous les objets
   const fl = $("snowfloor");
