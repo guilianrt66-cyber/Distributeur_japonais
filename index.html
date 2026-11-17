@@ -207,6 +207,8 @@
   @keyframes orbit { to { transform: rotate(360deg); } }
   .lampflick { animation: lampflick 9s infinite; }
   @keyframes lampflick { 0%,100%{opacity:1} 70%{opacity:1} 71%{opacity:.35} 72%{opacity:1} 73%{opacity:.6} 74%{opacity:1} }
+  .tail2 { animation: tail2 4s ease-in-out infinite; transform-box: fill-box; transform-origin: 0% 0%; }
+  @keyframes tail2 { 50% { transform: rotate(4deg); } }
   .tail { animation: tail 3s ease-in-out infinite; transform-box: fill-box; transform-origin: 0% 100%; }
   @keyframes tail { 50% { transform: rotate(-14deg); } }
   #neons > g { transition: filter .2s; }
@@ -283,12 +285,13 @@
   <!-- sol -->
   <rect x="0" y="830" width="1600" height="170" fill="url(#ground)"/>
   <polygon points="835,830 1000,690 1160,690 1350,830" fill="#111218"/>
+  <g id="snowfloor" display="none"></g>
   <path d="M835 300 L1000 488 M835 360 L1000 509 M835 420 L1000 530 M835 480 L1000 551 M835 540 L1000 572 M835 600 L1000 594 M835 660 L1000 615 M835 720 L1000 636 M835 780 L1000 657 M1350 260 L1160 501 M1350 330 L1160 520 M1350 400 L1160 539 M1350 470 L1160 558 M1350 540 L1160 577 M1350 610 L1160 595 M1350 680 L1160 614 M1350 750 L1160 633 M1350 810 L1160 649 M870 289 L870 800 M905 338 L905 771 M938 384 L938 743 M968 425 L968 717 M1310 257 L1310 801 M1270 314 L1270 771 M1232 368 L1232 743 M1195 420 L1195 716" stroke="#ffffff" stroke-opacity=".045" stroke-width="2" fill="none"/>
   <g fill="#000" opacity=".5" filter="url(#contact)">
     <ellipse cx="910" cy="793" rx="26" ry="4"/><ellipse cx="955" cy="791" rx="14" ry="3"/><ellipse cx="977" cy="773" rx="9" ry="2"/>
     <ellipse cx="957" cy="727" rx="13" ry="2.5"/><ellipse cx="1218" cy="763" rx="24" ry="4"/>
     <ellipse cx="1262" cy="830" rx="26" ry="4"/><ellipse cx="1289" cy="831" rx="20" ry="3"/><ellipse cx="1316" cy="831" rx="20" ry="3"/>
-    <ellipse cx="545" cy="831" rx="70" ry="5"/><ellipse cx="702" cy="831" rx="90" ry="5"/><ellipse cx="805" cy="831" rx="22" ry="4"/>
+    <ellipse cx="545" cy="831" rx="70" ry="5"/><ellipse cx="702" cy="831" rx="90" ry="5"/>
     <ellipse cx="213" cy="829" rx="55" ry="4"/><ellipse cx="352" cy="831" rx="60" ry="4"/>
   </g>
 
@@ -411,16 +414,7 @@
     <rect x="770" y="520" width="12" height="310" fill="#000" opacity=".18"/>
   </g>
   <!-- le chat -->
-  <g id="cat" transform="translate(805 830)">
-    <rect x="-30" y="-75" width="60" height="80" fill="transparent"/>
-    <path class="tail" d="M14 -2 Q34 -4 30 -22 Q28 -32 22 -30 Q28 -22 22 -12 Q18 -6 12 -6 Z" fill="#050507"/>
-    <ellipse cx="0" cy="-20" rx="15" ry="20" fill="#050507"/>
-    <circle cx="0" cy="-44" r="11" fill="#050507"/>
-    <path d="M-10 -50 L-9 -63 L-2 -53 Z M10 -50 L9 -63 L2 -53 Z" fill="#050507"/>
-    <g id="cat-hat" display="none">
-      <path d="M-12 -52 Q0 -58 12 -52 L4 -70 Q-1 -79 -9 -67 Z" fill="#c8242c"/>
-      <ellipse cx="0" cy="-52" rx="13" ry="3.5" fill="#f4f8ff"/><circle cx="-9" cy="-68" r="3.5" fill="#f4f8ff"/>
-    </g>
+
     <g id="cat-eyes"><g class="blink-eyes"><ellipse cx="-4" cy="-45" rx="2.4" ry="2" fill="#d6ff6a" filter="url(#glow)"/><ellipse cx="4" cy="-45" rx="2.4" ry="2" fill="#d6ff6a" filter="url(#glow)"/></g></g>
   </g>
   <!-- parapluie transparent oublié -->
@@ -454,6 +448,20 @@
   </g>
   <!-- neige du 24 -->
   <g id="snowcover" display="none"></g>
+  <!-- le chat, allongé sur le toit du distributeur -->
+  <g id="cat" transform="translate(720 516)">
+    <rect x="-44" y="-36" width="110" height="80" fill="transparent"/>
+    <path class="tail2" d="M20 -5 Q48 -4 58 4 Q64 18 62 38" stroke="#050507" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M-26 -1 Q-28 -20 -2 -21 Q22 -21 26 -4 Q10 1 -26 -1 Z" fill="#050507"/>
+    <path d="M-14 -2 q-3 4 3 4 M8 -2 q-3 4 3 4" stroke="#050507" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="-30" cy="-12" r="9.5" fill="#050507"/>
+    <path d="M-38 -17 L-37 -28 L-31 -20 Z M-25 -20 L-22 -30 L-20 -18 Z" fill="#050507"/>
+    <g id="cat-hat" display="none">
+      <path d="M-42 -18 Q-30 -24 -18 -18 L-26 -36 Q-31 -44 -37 -32 Z" fill="#c8242c"/>
+      <ellipse cx="-30" cy="-18" rx="13" ry="3.5" fill="#f4f8ff"/><circle cx="-37" cy="-33" r="3.5" fill="#f4f8ff"/>
+    </g>
+    <g id="cat-eyes"><g class="blink-eyes"><ellipse cx="-33.5" cy="-12" rx="2" ry="1.7" fill="#d6ff6a" filter="url(#glow)"/><ellipse cx="-26.5" cy="-12" rx="2" ry="1.7" fill="#d6ff6a" filter="url(#glow)"/></g></g>
+  </g>
   <!-- reflets sur le sol mouillé -->
   <g opacity=".55" filter="url(#soft)">
     <rect x="632" y="836" width="140" height="120" fill="#bfe8ff" opacity=".35"/>
@@ -998,13 +1006,14 @@ function buildSnow() {
   for (let x = -10; x <= 1610; x += 12) d += ` L${x} ${(830 - hAt(x) - rnd() * 2.5).toFixed(1)}`;
   add(d + " L1610 860 Z");
   // congères le long des murs de la ruelle
-  add("M835 831 L1000 691 L1001 697 Q940 752 846 832 Z");
-  add("M1350 831 L1160 691 L1159 697 Q1230 752 1340 832 Z");
-  svgEl("polygon", { points: "835,830 1000,690 1160,690 1350,830", fill: "#eef3ff", opacity: .22 }, g);
-  svgEl("rect", { x: 0, y: 840, width: 1600, height: 160, fill: "#eef3ff", opacity: .12 }, g);
+  // congères douces au pied des murs de la ruelle : dessinées sous les objets
+  const fl = $("snowfloor");
+  svgEl("path", { d: "M835 831 L1000 691 L1004 694 Q975 722 935 760 Q890 800 862 831 Z", fill: "#dfe8f6", opacity: .9 }, fl);
+  svgEl("path", { d: "M1350 831 L1160 691 L1156 694 Q1190 725 1238 765 Q1290 805 1318 831 Z", fill: "#dfe8f6", opacity: .9 }, fl);
+  svgEl("path", { d: "M835 831 L1000 691 L1002 693 L840 831 Z M1350 831 L1160 691 L1158 693 L1345 831 Z", fill: "#ffffff" }, fl);
   // petites traces de pattes jusqu'au chat
   for (let i = 0; i < 9; i++) {
-    const x = 1010 - i * 22, y = 905 - i * 7 + (i % 2) * 7;
+    const x = 990 - i * 24, y = 900 - i * 7 + (i % 2) * 7;
     svgEl("ellipse", { cx: x, cy: y, rx: 3.2, ry: 2, fill: "#9fb0c9", opacity: .7 }, g);
   }
 }
@@ -1223,6 +1232,7 @@ function applyTime(day) {
   curWinFrac = winFrac; updateMsgBuilding();
   snowing = day >= 24;
   $("snowcover").setAttribute("display", snowing ? "inline" : "none");
+  $("snowfloor").setAttribute("display", snowing ? "inline" : "none");
   Sound.setRainFactor(snowing ? .15 : 1);
   Sound.setChristmas(snowing);
   $("cat-hat").setAttribute("display", snowing ? "inline" : "none");
