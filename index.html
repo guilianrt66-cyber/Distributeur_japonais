@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>深夜の自販機</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --paper: #f3ecdc; --ink: #1b1b22; --neon-blue: #6fd3ff; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; height: 100%; background: #07080d; overflow: hidden; }
+  body { font-family: "Zen Maru Gothic", system-ui, sans-serif; color: #e8ecf5; }
+  button { font-family: inherit; }
+
+  /* ---------- Écran d'entrée ---------- */
+  #intro {
+    position: fixed; inset: 0; z-index: 80; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at 50% 60%, rgba(20, 30, 60, .55), rgba(3, 4, 8, .92)); text-align: center; padding: 20px;
+    transition: opacity .9s;
+  }
+  #intro.gone { opacity: 0; pointer-events: none; }
+  .intro-jp { font-size: clamp(30px, 8vw, 56px); font-weight: 700; letter-spacing: 6px; color: #fff; text-shadow: 0 0 18px #ff4f8a, 0 0 40px rgba(255, 79, 138, .6); animation: neonflick 6s infinite; }
+  .intro-fr { margin-top: 8px; font-size: 15px; opacity: .8; }
+  .intro-sub { margin-top: 18px; font-size: 14px; opacity: .65; max-width: 420px; line-height: 1.6; }
+  .enter { margin-top: 30px; background: none; color: #fff; border: 1px solid var(--neon-blue); padding: 11px 26px; border-radius: 30px; font-size: 16px; cursor: pointer; box-shadow: 0 0 18px rgba(111, 211, 255, .35); }
+  .enter:hover { background: rgba(111, 211, 255, .12); }
+  .intro-note { margin-top: 14px; font-size: 12px; opacity: .45; }
+
+  /* ---------- La rue ---------- */
+  #scene-wrap { position: fixed; inset: 0; transition: transform 1.3s cubic-bezier(.65, 0, .3, 1), filter 1s; will-change: transform; }
+  #scene { width: 100%; height: 100%; display: block; }
+  #scene-machine, #cat { cursor: pointer; }
+  #machine-halo { animation: halo 2.6s ease-in-out infinite; }
+  @keyframes halo { 50% { opacity: .55; } }
+  .neon-flicker { animation: neonflick 5s infinite; }
+  @keyframes neonflick { 0%,100%{opacity:1} 41%{opacity:1} 42%{opacity:.25} 43%{opacity:1} 44%{opacity:.4} 46%{opacity:1} }
+  .blink-eyes { animation: eyes 5s infinite; transform-origin: center; transform-box: fill-box; }
+  @keyframes eyes { 0%,92%,100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+  #rain { position: fixed; inset: 0; pointer-events: none; z-index: 3; }
+  #fade { position: fixed; inset: 0; background: #05060a; opacity: 0; pointer-events: none; z-index: 4; transition: opacity .5s; }
+  .meow { position: fixed; z-index: 7; background: #fff; color: #111; padding: 4px 10px; border-radius: 12px; font-size: 14px; font-weight: 700; pointer-events: none; animation: meow 1.4s ease-out forwards; }
+  @keyframes meow { 0% { opacity: 0; transform: translate(-50%, 0); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -40px); } }
+
+  .street-ui { position: fixed; inset: 0; pointer-events: none; z-index: 5; transition: opacity .4s; }
+  .street-ui.hidden { opacity: 0; }
+  .clock { position: absolute; top: 14px; left: 16px; text-shadow: 0 0 10px rgba(0,0,0,.9); }
+  .clock-time { font-family: "DotGothic16", monospace; font-size: 32px; letter-spacing: 2px; display: block; }
+  .clock-sub { font-size: 13px; opacity: .85; }
+  .street-hint {
+    position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%);
+    background: rgba(5, 6, 12, .7); border: 1px solid rgba(111, 211, 255, .35);
+    padding: 9px 16px; border-radius: 20px; font-size: 14px; white-space: nowrap; animation: bob 2.4s ease-in-out infinite;
+  }
+  body.testing .street-hint { bottom: 80px; }
+  @keyframes bob { 50% { transform: translate(-50%, -5px); } }
+
+  .topbtns { position: fixed; top: 12px; right: 12px; z-index: 30; display: flex; gap: 8px; }
+  .pill { background: rgba(5, 6, 12, .72); color: #fff; border: 1px solid rgba(255,255,255,.3); border-radius: 20px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+  .pill b { color: var(--neon-blue); }
+
+  /* ---------- Vue rapprochée ---------- */
+  #closeup {
+    position: fixed; inset: 0; z-index: 6; overflow-y: auto; display: none; opacity: 0; transition: opacity .6s;
+    background: radial-gradient(ellipse 60% 70% at 40% 50%, rgba(0,0,0,0), rgba(0,0,0,.55));
+  }
+  #closeup.show { opacity: 1; }
+  .closeup-inner { min-height: 100%; display: flex; gap: 32px; align-items: center; justify-content: center; padding: 60px 14px 40px; }
+  body.testing .closeup-inner { padding-bottom: 90px; }
+  .back { position: fixed; top: 12px; left: 12px; z-index: 30; }
+  .vm-holder { position: relative; flex-shrink: 0; }
+
+  .vm {
+    width: 470px; position: absolute; top: 0; left: 0; transform-origin: top left; user-select: none;
+    background: linear-gradient(90deg, #c4c9d1 0%, #f4f5f8 7%, #eceef2 60%, #d5d9e0 93%, #b9bec7 100%);
+    border-radius: 10px 10px 4px 4px; padding: 10px 10px 14px;
+    box-shadow: 0 0 90px rgba(140, 210, 255, .45), 0 30px 50px rgba(0,0,0,.7);
+  }
+  .vm-inner.shake { animation: shake .35s; }
+  .vm.broken .glass { filter: brightness(.45) saturate(.5); }
+  .vm.broken .tube { animation: tubeflick .6s infinite; }
+  @keyframes shake { 0%,100% { transform: translateX(0) rotate(0); } 20% { transform: translateX(-7px) rotate(-1deg); } 40% { transform: translateX(6px) rotate(1deg); } 60% { transform: translateX(-4px); } 80% { transform: translateX(3px); } }
+
+  .vm-head { border-radius: 6px; padding: 9px 12px; display: flex; gap: 8px; justify-content: space-between; align-items: center; background: linear-gradient(180deg, #e0213f, #a90d26); color: #fff; box-shadow: 0 0 18px rgba(255,50,80,.55), inset 0 0 12px rgba(255,255,255,.25); }
+  .vm-logo { font-weight: 700; font-size: 17px; letter-spacing: 1px; }
+  .vm-brand { flex-shrink: 0; font-family: "DotGothic16", monospace; font-size: 12px; background: #fff; color: #c8102e; padding: 2px 7px; border-radius: 3px; }
+  .bezel { margin-top: 10px; background: #10141c; border-radius: 6px; padding: 6px; box-shadow: inset 0 0 0 2px #2a303c; }
+  .glass { position: relative; overflow: hidden; border-radius: 3px; background: linear-gradient(180deg, #f2faff 0%, #d6ecfb 100%); padding: 12px 6px 4px; transition: filter .3s; }
+  .tube { position: absolute; top: 3px; left: 8px; right: 8px; height: 4px; border-radius: 3px; z-index: 2; background: #fff; box-shadow: 0 0 10px #fff, 0 0 26px rgba(170,225,255,.9); animation: tubeflick 7s infinite; }
+  @keyframes tubeflick { 0%,100%{opacity:1} 63%{opacity:1} 64%{opacity:.3} 65%{opacity:1} 66%{opacity:.5} 67%{opacity:1} }
+  .glass::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.28) 38%, transparent 46%, transparent 62%, rgba(255,255,255,.14) 66%, transparent 70%); }
+  .side-leds { position: absolute; top: 14px; bottom: 8px; width: 4px; display: flex; flex-direction: column; justify-content: space-around; z-index: 2; }
+  .side-leds.l { left: 2px; } .side-leds.r { right: 2px; }
+  .side-leds i { width: 4px; height: 4px; border-radius: 50%; animation: twinkle 2s infinite; }
+  @keyframes twinkle { 0%,100%{opacity:.25} 50%{opacity:1} }
+
+  .shelf { margin-bottom: 6px; }
+  .products { display: grid; grid-template-columns: repeat(6, 1fr); align-items: end; height: 74px; padding: 0 2px; }
+  .product { display: flex; justify-content: center; align-items: flex-end; cursor: pointer; transition: filter .3s, opacity .3s, transform .2s; }
+  .product:hover { transform: translateY(-2px); }
+  .product svg { filter: drop-shadow(0 3px 2px rgba(0,0,0,.25)); }
+  .slot-locked .product { filter: brightness(.6) saturate(.55); }
+  .slot-opened .product { opacity: .18; }
+  .ledge { height: 5px; background: linear-gradient(#b5bfcc, #8792a3); border-radius: 1px; }
+  .ledstrip { height: 2px; margin: 0 4px; background: #bfeaff; box-shadow: 0 0 8px #8fdcff, 0 0 2px #fff; }
+  .tags { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; padding: 4px 1px 2px; }
+  .tag { width: 100%; background: #fff; border-radius: 3px; text-align: center; padding: 2px 1px 3px; cursor: pointer; box-shadow: 0 1px 0 #9aa5b5; border: none; display: flex; flex-direction: column; align-items: center; gap: 1px; }
+  .tag .num { font-family: "DotGothic16", monospace; font-size: 17px; color: #1b1b22; line-height: 1.1; }
+  .tag .state { font-size: 10px; font-weight: 700; line-height: 1.15; white-space: nowrap; color: #6b7384; }
+  .tag .led { width: 10px; height: 10px; border-radius: 50%; background: #3b2228; margin-top: 1px; box-shadow: inset 0 1px 1px rgba(0,0,0,.5); }
+  .slot-available .tag .led { background: #ff2d4b; box-shadow: 0 0 6px #ff2d4b, 0 0 12px rgba(255,45,75,.7); animation: blink 1s steps(2) infinite; }
+  .slot-available .tag .state { color: #d6203f; }
+  .slot-opened .tag .state { color: #fff; background: #d6203f; padding: 0 3px; border-radius: 2px; box-shadow: 0 0 6px rgba(255,45,75,.6); }
+  .slot-opened .tag .led { background: #612; }
+  @keyframes blink { 50% { opacity: .25; } }
+
+  .vm-panel { display: flex; gap: 8px; margin-top: 10px; align-items: stretch; }
+  .lcd { flex: 1; background: #0b1710; border-radius: 4px; padding: 7px 9px; min-height: 38px; font-family: "DotGothic16", monospace; color: #7dff9b; font-size: 15px; text-shadow: 0 0 6px rgba(125,255,155,.75); box-shadow: inset 0 0 10px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; }
+  .coin { width: 38px; background: #2b2f3a; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .coin i { display: block; width: 3px; height: 16px; background: #000; border-radius: 2px; box-shadow: 0 0 0 2px #555c6b; }
+  .coin b { width: 6px; height: 6px; border-radius: 50%; background: #ffcf3a; box-shadow: 0 0 6px #ffcf3a; animation: blink 1.6s steps(2) infinite; }
+  .flap { margin-top: 10px; height: 68px; border-radius: 6px; position: relative; overflow: hidden; cursor: pointer; width: 100%; border: none; background: linear-gradient(180deg, #0e1016, #2a2f3b); box-shadow: inset 0 10px 14px rgba(0,0,0,.85), 0 0 0 3px #b8bec8; }
+  .flap-label { position: absolute; top: 5px; left: 9px; font-size: 11px; color: #9aa3b5; }
+  .flap.ready { box-shadow: inset 0 10px 14px rgba(0,0,0,.85), 0 0 0 3px #ffd76a, 0 0 18px rgba(255,215,106,.7); }
+  .flap .take { position: absolute; right: 10px; top: 5px; font-size: 12px; color: #ffd76a; display: none; animation: blink 1.2s infinite; }
+  .flap.ready .take { display: block; }
+  .falling { position: absolute; left: 50%; bottom: 6px; animation: drop .55s cubic-bezier(.5,0,.75,0) both, land .3s .55s ease-out; }
+  @keyframes drop { from { transform: translate(-50%, -110px) rotate(-60deg); } to { transform: translate(-50%, 0) rotate(-90deg); } }
+  @keyframes land { 50% { transform: translate(-50%, -6px) rotate(-90deg); } to { transform: translate(-50%, 0) rotate(-90deg); } }
+  .falling svg { display: block; }
+
+  /* Panneau « collection » */
+  .panel { width: 310px; max-width: 94vw; background: rgba(9, 11, 19, .78); border: 1px solid rgba(111,211,255,.22); border-radius: 14px; padding: 16px; backdrop-filter: blur(6px); align-self: center; }
+  .panel h3 { margin: 0 0 4px; font-size: 16px; display: flex; justify-content: space-between; align-items: baseline; }
+  .panel h3 span { font-family: "DotGothic16", monospace; color: var(--neon-blue); font-size: 14px; }
+  .panel .time-label { font-size: 12px; opacity: .65; margin-bottom: 12px; }
+  .collection { display: flex; flex-direction: column; gap: 6px; max-height: 46vh; overflow-y: auto; padding-right: 4px; }
+  .coll-item { display: flex; gap: 10px; align-items: center; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); border-radius: 8px; padding: 6px 8px; cursor: pointer; text-align: left; color: inherit; width: 100%; }
+  .coll-item:hover { background: rgba(111,211,255,.1); }
+  .coll-item svg { flex-shrink: 0; }
+  .coll-item .ci-day { font-family: "DotGothic16", monospace; font-size: 11px; color: var(--neon-blue); }
+  .coll-item .ci-title { font-size: 13px; font-weight: 700; line-height: 1.25; }
+  .coll-item .ci-artist { font-size: 11px; opacity: .6; }
+  .coll-empty { font-size: 13px; opacity: .6; line-height: 1.5; }
+  .fragments { display: flex; gap: 6px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
+  .fragments-label { font-size: 12px; opacity: .8; width: 100%; }
+  .frag { flex: 1; min-width: 50px; height: 30px; padding: 0 6px; border-radius: 4px; border: 1px dashed rgba(255,255,255,.35); display: flex; align-items: center; justify-content: center; font-family: "DotGothic16", monospace; font-size: 13px; color: rgba(255,255,255,.4); }
+  .frag.got { background: var(--paper); color: var(--ink); border: 1px solid var(--paper); transform: rotate(-2deg); }
+  .hint { font-size: 13px; opacity: .85; margin: 14px 0 0; min-height: 18px; line-height: 1.5; }
+
+  @media (max-width: 899px) {
+    .closeup-inner { flex-direction: column; justify-content: flex-start; gap: 18px; }
+  }
+
+  /* ---------- Fenêtre de la boisson ---------- */
+  .modal-bg { position: fixed; inset: 0; z-index: 60; background: rgba(4,5,12,.8); display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 24px 12px; backdrop-filter: blur(3px); }
+  .card { width: min(100%, 780px); background: #12141d; border-radius: 14px; padding: 18px; border: 1px solid rgba(111,211,255,.25); box-shadow: 0 0 40px rgba(111,211,255,.15); position: relative; animation: rise .35s ease-out; }
+  @keyframes rise { from { transform: translateY(20px); opacity: 0; } }
+  .close { position: absolute; top: 10px; right: 12px; background: none; border: none; color: #aab; font-size: 26px; cursor: pointer; line-height: 1; }
+  .card-head { font-family: "DotGothic16", monospace; font-size: 13px; color: var(--neon-blue); display: flex; gap: 10px; }
+  .chip { display: inline-block; margin-top: 10px; font-size: 11px; padding: 3px 9px; border-radius: 20px; background: rgba(255,79,109,.15); color: #ff8aa0; border: 1px solid rgba(255,79,109,.4); }
+  .card h2 { margin: 10px 0 0; font-size: 22px; line-height: 1.3; }
+  .romaji { margin: 2px 0 0; color: #b9a6ff; font-size: 14px; }
+  .artist { margin: 4px 0 12px; color: #9aa3b5; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .tab { border: 1px solid rgba(255,255,255,.2); background: none; color: #ccd; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; }
+  .tab.active { background: var(--neon-blue); color: #0b1020; border-color: var(--neon-blue); }
+  .player { aspect-ratio: 16/9; background: #000; border-radius: 8px; overflow: hidden; }
+  .player iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .player .missing { height: 100%; display: flex; align-items: center; justify-content: center; color: #667; font-size: 13px; padding: 10px; text-align: center; }
+  .yt-link { margin-top: 6px; font-size: 12px; text-align: right; }
+  .yt-link a { color: #8fa3c0; }
+  .info { line-height: 1.6; font-size: 15px; margin: 14px 0 0; color: #d6dbe6; }
+  .mot { margin-top: 14px; padding: 12px 14px; background: var(--paper); color: var(--ink); border-radius: 4px; transform: rotate(-.6deg); line-height: 1.6; font-size: 15px; white-space: pre-line; }
+  .bonus { margin-top: 18px; }
+  .bonus-btn { width: 100%; padding: 12px; border-radius: 10px; border: 1px dashed #ffd76a; background: rgba(255,215,106,.08); color: #ffd76a; font-size: 14px; cursor: pointer; }
+  .bonus-card { margin-top: 12px; animation: rise .35s ease-out; }
+  .paper { background: var(--paper); color: var(--ink); padding: 14px; border-radius: 4px; line-height: 1.6; white-space: pre-line; transform: rotate(.8deg); }
+  .ticket { background: #ffd76a; color: #2a1d00; padding: 14px 16px; border-radius: 6px; border-left: 4px dashed #2a1d00; font-weight: 700; line-height: 1.5; }
+  .ticket small { display: block; font-weight: 400; margin-top: 6px; }
+  .objet { text-align: center; line-height: 1.6; }
+  .objet .emoji { font-size: 56px; display: block; }
+  .frag-big { display: inline-block; background: var(--paper); color: var(--ink); font-family: "DotGothic16", monospace; font-size: 26px; padding: 6px 16px; transform: rotate(-3deg); margin: 8px 0; }
+  .final-pass { font-family: "DotGothic16", monospace; font-size: 30px; letter-spacing: 4px; text-align: center; color: #ffd76a; text-shadow: 0 0 12px rgba(255,215,106,.6); margin: 10px 0; }
+
+  /* ---------- Barre de test ---------- */
+  .testbar { position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 70; background: #ffd76a; color: #2a1d00; border-radius: 30px; padding: 6px 8px; display: flex; gap: 6px; align-items: center; font-size: 13px; font-weight: 700; box-shadow: 0 4px 20px rgba(0,0,0,.6); white-space: nowrap; }
+  .testbar button { border: none; background: #2a1d00; color: #ffd76a; border-radius: 20px; padding: 5px 10px; cursor: pointer; font-weight: 700; }
+  .testbar .d { min-width: 64px; text-align: center; }
+
+  /* ---------- Détails animés de la ruelle ---------- */
+  .drift { animation: drift linear infinite; }
+  @keyframes drift { from { transform: translateX(-700px); } to { transform: translateX(1900px); } }
+  .plane { animation: plane 80s linear infinite; }
+  @keyframes plane { from { transform: translate(-60px, 100px); } to { transform: translate(1680px, 30px); } }
+  .blinkfast { animation: blink 1.1s steps(2) infinite; }
+  .spin { animation: spin 3s linear infinite; transform-box: fill-box; transform-origin: center; }
+  .spin.slow { animation-duration: 5s; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .sway { animation: sway 5s ease-in-out infinite; transform-box: fill-box; transform-origin: top center; }
+  @keyframes sway { 50% { transform: rotate(2.5deg); } }
+  .steam circle { animation: steam 4s ease-out infinite; transform-box: fill-box; transform-origin: center; opacity: 0; }
+  @keyframes steam { 0% { opacity: 0; transform: translateY(0) scale(.6); } 20% { opacity: .35; } 100% { opacity: 0; transform: translateY(-80px) scale(2); } }
+  .orbit { animation: orbit 2.4s linear infinite; }
+  @keyframes orbit { to { transform: rotate(360deg); } }
+  .lampflick { animation: lampflick 9s infinite; }
+  @keyframes lampflick { 0%,100%{opacity:1} 70%{opacity:1} 71%{opacity:.35} 72%{opacity:1} 73%{opacity:.6} 74%{opacity:1} }
+  .tail { animation: tail 3s ease-in-out infinite; transform-box: fill-box; transform-origin: 0% 100%; }
+  @keyframes tail { 50% { transform: rotate(-14deg); } }
+  #neons > g { transition: filter .2s; }
+  #neons > g:hover { filter: brightness(1.8) saturate(1.3); }
+  #shrine, #msg-building { cursor: pointer; }
+  #shrine:hover { filter: brightness(1.35); }
+  #scene-machine:hover { filter: brightness(1.08); }
+  .product:hover svg { filter: drop-shadow(0 0 6px rgba(255,255,255,.95)) brightness(1.12); }
+  .tip { position: fixed; z-index: 65; pointer-events: none; background: rgba(8,10,18,.92); border: 1px solid rgba(111,211,255,.35); color: #e8ecf5; font-size: 12px; padding: 4px 9px; border-radius: 8px; white-space: nowrap; transform: translate(-50%, -140%); }
+  .omikuji-bg { position: fixed; inset: 0; z-index: 62; background: rgba(4,5,12,.7); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); cursor: pointer; }
+  .omikuji { width: 230px; background: #f7f1e3; color: #2a1d10; border-radius: 3px; padding: 18px 16px 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.6); animation: unroll .5s ease-out; border-top: 10px solid #b3202a; border-bottom: 10px solid #b3202a; transform-origin: top; }
+  @keyframes unroll { from { transform: scaleY(.05); opacity: 0; } }
+  .ok-title { font-size: 13px; letter-spacing: 4px; color: #b3202a; }
+  .ok-kanji { font-size: 56px; font-weight: 700; margin: 6px 0 0; color: #b3202a; }
+  .ok-read { font-size: 12px; opacity: .7; }
+  .ok-text { margin-top: 12px; font-size: 14px; line-height: 1.55; }
+  .ok-close { margin-top: 14px; font-size: 11px; opacity: .5; }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- ======================= LA RUE ======================= -->
+<div id="scene-wrap">
+<svg id="scene" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop id="sky-top" offset="0" stop-color="#2b1b4a"/><stop id="sky-bot" offset="1" stop-color="#e0785a"/></linearGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2e3038"/><stop offset=".6" stop-color="#24262d"/><stop offset="1" stop-color="#17181d"/></linearGradient>
+    <linearGradient id="grime" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a1c23"/><stop offset="1" stop-color="#08090d"/></linearGradient>
+    <linearGradient id="shutter" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8f7ff"/><stop offset="1" stop-color="#b8dcef"/></linearGradient>
+    <radialGradient id="mglow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#a8e2ff" stop-opacity=".55"/><stop offset="1" stop-color="#a8e2ff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="bglow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#4fd6ff" stop-opacity=".45"/><stop offset="1" stop-color="#4fd6ff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="rglow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ff3a3a" stop-opacity=".55"/><stop offset="1" stop-color="#ff3a3a" stop-opacity="0"/></radialGradient>
+    <radialGradient id="lglow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#e4fff2" stop-opacity=".55"/><stop offset="1" stop-color="#bfffe0" stop-opacity="0"/></radialGradient>
+    <radialGradient id="warm" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffb35c" stop-opacity=".55"/><stop offset="1" stop-color="#ffb35c" stop-opacity="0"/></radialGradient>
+    <radialGradient id="wglow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#dff3ff" stop-opacity=".4"/><stop offset="1" stop-color="#dff3ff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="moonglow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff8e0" stop-opacity=".5"/><stop offset="1" stop-color="#fff8e0" stop-opacity="0"/></radialGradient>
+    <radialGradient id="dusk" cx=".5" cy="1" r=".7"><stop offset="0" stop-color="#ffb060" stop-opacity=".95"/><stop offset=".5" stop-color="#ff6a6a" stop-opacity=".45"/><stop offset="1" stop-color="#ff6a6a" stop-opacity="0"/></radialGradient>
+    <radialGradient id="dawn" cx=".5" cy="1" r=".7"><stop offset="0" stop-color="#ffe0a8" stop-opacity=".95"/><stop offset=".5" stop-color="#ffa6b8" stop-opacity=".5"/><stop offset="1" stop-color="#ffa6b8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vignette" cx=".5" cy=".55" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></radialGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="contact" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.5"/></filter>
+  </defs>
+
+  <!-- ===== Ciel ===== -->
+  <rect x="0" y="0" width="1600" height="1000" fill="url(#sky)"/>
+  <ellipse id="sun-dusk" cx="800" cy="720" rx="1100" ry="560" fill="url(#dusk)"/>
+  <ellipse id="sun-dawn" cx="800" cy="720" rx="1100" ry="560" fill="url(#dawn)" opacity="0"/>
+  <g id="stars"></g>
+  <g id="moon"><circle r="110" fill="url(#moonglow)"/><circle r="26" fill="#fff6dc"/><circle cx="9" cy="-6" r="22" fill="#000" opacity=".0"/></g>
+  <g id="clouds">
+    <g class="drift" style="animation-duration:210s;animation-delay:-60s"><ellipse cx="300" cy="150" rx="170" ry="20" fill="#151729" opacity=".55"/><ellipse cx="380" cy="138" rx="90" ry="16" fill="#151729" opacity=".55"/></g>
+    <g class="drift" style="animation-duration:260s;animation-delay:-170s"><ellipse cx="800" cy="95" rx="220" ry="18" fill="#151729" opacity=".45"/><ellipse cx="700" cy="85" rx="100" ry="14" fill="#151729" opacity=".45"/></g>
+  </g>
+  <g class="plane"><circle r="1.8" fill="#fff"/><circle cx="7" r="2" fill="#ff4040" class="blinkfast"/></g>
+  <g id="skyline"></g>
+
+  <!-- ===== Structures ===== -->
+  <rect x="0" y="250" width="835" height="580" fill="url(#wall)"/>
+  <rect x="0" y="240" width="835" height="14" fill="#1a1b20"/>
+  <rect x="0" y="250" width="835" height="580" fill="url(#grime)"/>
+  <polygon points="835,240 1000,470 1000,690 835,830" fill="#1b1c22"/>
+  <rect x="990" y="455" width="180" height="235" fill="#13151f"/>
+  <polygon points="1350,200 1160,470 1160,690 1350,830" fill="#18191f"/>
+  <rect x="1350" y="200" width="250" height="630" fill="#1e1f26"/>
+  <rect x="1350" y="190" width="250" height="14" fill="#141519"/>
+  <g id="facade"></g>
+  <!-- porte -->
+  <rect x="300" y="590" width="105" height="240" fill="#2b1d16"/>
+  <rect x="285" y="568" width="140" height="22" fill="#121318"/>
+  <!-- sol -->
+  <rect x="0" y="830" width="1600" height="170" fill="url(#ground)"/>
+  <polygon points="835,830 1000,690 1160,690 1350,830" fill="#111218"/>
+  <path d="M835 300 L1000 488 M835 360 L1000 509 M835 420 L1000 530 M835 480 L1000 551 M835 540 L1000 572 M835 600 L1000 594 M835 660 L1000 615 M835 720 L1000 636 M835 780 L1000 657 M1350 260 L1160 501 M1350 330 L1160 520 M1350 400 L1160 539 M1350 470 L1160 558 M1350 540 L1160 577 M1350 610 L1160 595 M1350 680 L1160 614 M1350 750 L1160 633 M1350 810 L1160 649 M870 289 L870 800 M905 338 L905 771 M938 384 L938 743 M968 425 L968 717 M1310 257 L1310 801 M1270 314 L1270 771 M1232 368 L1232 743 M1195 420 L1195 716" stroke="#ffffff" stroke-opacity=".045" stroke-width="2" fill="none"/>
+  <g fill="#000" opacity=".5" filter="url(#contact)">
+    <ellipse cx="918" cy="791" rx="34" ry="4"/><ellipse cx="948" cy="792" rx="5" ry="2"/><ellipse cx="968" cy="792" rx="5" ry="2"/>
+    <ellipse cx="960" cy="727" rx="22" ry="3"/><ellipse cx="1218" cy="763" rx="24" ry="4"/>
+    <ellipse cx="1262" cy="830" rx="26" ry="4"/><ellipse cx="1289" cy="831" rx="20" ry="3"/><ellipse cx="1316" cy="831" rx="20" ry="3"/>
+    <ellipse cx="545" cy="831" rx="70" ry="5"/><ellipse cx="702" cy="831" rx="90" ry="5"/><ellipse cx="805" cy="831" rx="22" ry="4"/>
+    <ellipse cx="213" cy="829" rx="55" ry="4"/><ellipse cx="352" cy="831" rx="60" ry="4"/>
+  </g>
+
+  <!-- affiches -->
+  <rect x="188" y="612" width="46" height="64" fill="#d8ccb2"/><rect x="192" y="617" width="38" height="32" fill="#a8323a"/><circle cx="211" cy="633" r="9" fill="#f3e3c0"/>
+  <text x="211" y="665" font-size="9" text-anchor="middle" fill="#2a2a2a" font-family="DotGothic16, monospace">LIVE</text>
+  <g transform="rotate(4 262 640)"><rect x="240" y="606" width="44" height="62" fill="#26346b"/><text x="262" y="630" font-size="13" text-anchor="middle" fill="#ff7cc0" font-family="Zen Maru Gothic, sans-serif">夜</text><text x="262" y="648" font-size="8" text-anchor="middle" fill="#cfe" font-family="Zen Maru Gothic, sans-serif">ネオン祭</text><rect x="246" y="654" width="32" height="3" fill="#ffd84f"/></g>
+  <rect x="236" y="682" width="22" height="16" fill="#e9e3d0" transform="rotate(-6 247 690)"/>
+  <!-- vélo -->
+  <g stroke="#0a0b0e" stroke-width="4" fill="none" stroke-linecap="round">
+    <circle cx="170" cy="802" r="25"/><circle cx="256" cy="802" r="25"/>
+    <path d="M170 802 L205 770 L240 770 L256 802 M205 770 L215 802 L170 802 M215 802 L240 770 M199 760 L213 760 M205 770 L203 760 M240 770 L236 752 L250 750"/>
+  </g>
+  <rect x="234" y="736" width="26" height="15" fill="none" stroke="#0a0b0e" stroke-width="3"/>
+  <!-- poteau électrique -->
+  <rect x="842" y="30" width="14" height="800" fill="#101115"/>
+  <rect x="808" y="105" width="82" height="7" fill="#101115"/><rect x="820" y="165" width="58" height="6" fill="#101115"/>
+  <rect x="858" y="225" width="26" height="64" rx="8" fill="#33363d"/>
+  <path d="M812 108 Q600 200 -10 185 M886 108 Q1100 210 1610 160 M822 168 Q500 270 -10 262 M876 168 Q1050 240 1360 212 M871 232 Q850 300 849 330 M812 108 Q700 60 600 -10" stroke="#08090c" stroke-width="2" fill="none"/>
+  <rect x="836" y="540" width="26" height="40" fill="#1f4fa0"/>
+  <text x="849" y="556" font-size="8" fill="#fff" text-anchor="middle" font-family="Zen Maru Gothic, sans-serif">深夜町</text>
+  <text x="849" y="571" font-size="9" fill="#fff" text-anchor="middle" font-family="DotGothic16, monospace">2-4</text>
+  <!-- grille d'aération -->
+  <rect x="905" y="585" width="22" height="16" fill="#2a2d35"/><path d="M907 589 H925 M907 593 H925 M907 597 H925" stroke="#14151a" stroke-width="1.5"/>
+  <!-- poubelles -->
+  <path d="M1242 829 Q1237 806 1255 801 Q1261 796 1267 801 Q1284 806 1280 829 Z" fill="#cfd8df" opacity=".9"/>
+  <path d="M1261 801 q-4 -6 0 -6 q4 0 0 6" fill="#cfd8df"/>
+  <path d="M1272 830 Q1269 812 1283 808 Q1288 803 1293 808 Q1306 814 1302 830 Z" fill="#b5c3cd" opacity=".9"/>
+  <path d="M1288 808 q-3 -5 0 -5 q3 0 0 5" fill="#b5c3cd"/>
+  <rect x="1300" y="782" width="30" height="48" rx="3" fill="#2d5aa8"/><rect x="1298" y="777" width="34" height="8" rx="2" fill="#244a8c"/>
+  <!-- ruelle : mur gauche -->
+  <polygon points="944,566 968,552 968,574 944,588" fill="#62666f"/><circle cx="956" cy="570" r="7" fill="#2b2f37"/>
+  <polygon points="970,712 988,697 988,632 970,643" fill="#2e2219"/>
+  <g>
+    <polygon points="971,709 971,726 981.7,713.8 981.7,698.3" fill="#9c7414"/>
+    <rect x="939" y="709" width="32" height="17" rx="1.5" fill="#d9a321"/>
+    <path d="M945 711 V724 M951 711 V724 M957 711 V724 M963 711 V724" stroke="#a87a10" stroke-width="1.5"/>
+    <rect x="950" y="712" width="10" height="3.5" rx="1.5" fill="#5a3f06"/>
+    <g fill="#4a2209"><rect x="943" y="686" width="4" height="10"/><rect x="950" y="684" width="4" height="12"/><rect x="957" y="686" width="4" height="10"/><rect x="964" y="685" width="4" height="11"/></g>
+    <g fill="#cfd3d8"><rect x="943" y="684" width="4" height="2.5"/><rect x="950" y="682" width="4" height="2.5"/><rect x="957" y="684" width="4" height="2.5"/><rect x="964" y="683" width="4" height="2.5"/></g>
+    <polygon points="970,693 970,709 980.8,698.3 980.8,683.7" fill="#7e2219"/>
+    <rect x="941" y="693" width="29" height="16" rx="1.5" fill="#c0392b"/>
+    <path d="M947 695 V707 M953 695 V707 M959 695 V707 M965 695 V707" stroke="#8a2318" stroke-width="1.5"/>
+    <rect x="951" y="696" width="9" height="3.5" rx="1.5" fill="#4a0f08"/>
+  </g>
+  <!-- ruelle : mur droit -->
+  <polygon points="1250,600 1285,594 1285,622 1250,627" fill="#62666f"/><circle cx="1267" cy="611" r="8" fill="#2b2f37"/>
+  <polygon points="1300,690 1318,687 1318,712 1300,714" fill="#7a3030"/><polygon points="1300,718 1318,716 1318,740 1300,741" fill="#7a3030"/>
+  <!-- scooter (vu de l'arrière, garé le long du mur) -->
+  <g>
+    <rect x="1213" y="742" width="10" height="21" rx="4.5" fill="#0a0b0e"/>
+    <path d="M1201 750 Q1200 729 1218 726 Q1236 729 1235 750 L1230 755 L1206 755 Z" fill="#c23b3b"/>
+    <path d="M1205 733 Q1218 729 1231 733" stroke="#e05555" stroke-width="2" fill="none"/>
+    <path d="M1206 727 Q1218 719 1230 727 L1228 730 L1208 730 Z" fill="#111"/>
+    <rect x="1207" y="708" width="22" height="17" rx="3" fill="#e8e3d6"/><rect x="1207" y="719" width="22" height="3" fill="#b9b3a5"/>
+    <path d="M1194 714 H1242 M1197 714 L1194 702 M1239 714 L1242 702" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="1193" cy="700" rx="4" ry="3" fill="#2a2d33"/><ellipse cx="1243" cy="700" rx="4" ry="3" fill="#2a2d33"/>
+  </g>
+  <!-- marquage au sol -->
+  <polygon points="904,786 1270,786 1272,792 902,792" fill="#e8e8e8" opacity=".28"/>
+  <foreignObject x="880" y="770" width="420" height="60"><div xmlns="http://www.w3.org/1999/xhtml" style="width:420px;height:60px;font:700 56px 'Zen Maru Gothic',sans-serif;color:rgba(232,232,232,.3);text-align:center;letter-spacing:10px;line-height:60px;transform:perspective(140px) rotateX(52deg);transform-origin:50% 100%">止まれ</div></foreignObject>
+  <!-- balcon -->
+  <line x1="1376" y1="472" x2="1594" y2="472" stroke="#2c2f37" stroke-width="4"/>
+  <line x1="1376" y1="506" x2="1594" y2="506" stroke="#2c2f37" stroke-width="3"/>
+  <line x1="1380" y1="442" x2="1590" y2="438" stroke="#0c0d10" stroke-width="2"/>
+  <g id="laundry"></g>
+
+  <!-- ===== Lumière ambiante (change avec l'heure) ===== -->
+  <rect id="ambient" x="0" y="0" width="1600" height="1000" fill="#000" opacity="0"/>
+
+  <!-- ===== Lumières ===== -->
+  <g id="lights"></g>
+  <!-- porte éclairée -->
+  <rect x="310" y="600" width="85" height="150" fill="#6b4a2a" opacity=".85"/>
+  <rect x="310" y="600" width="85" height="150" fill="#ffcf8a" opacity=".2"/>
+  <line x1="352" y1="600" x2="352" y2="750" stroke="#2b1d16" stroke-width="4"/>
+  <!-- lanterne rouge -->
+  <circle cx="452" cy="610" r="90" fill="url(#rglow)"/>
+  <g class="neon-flicker">
+    <rect x="440" y="572" width="24" height="5" fill="#111"/>
+    <ellipse cx="452" cy="610" rx="22" ry="32" fill="#e12a2a" filter="url(#glow)"/>
+    <path d="M432 598 H472 M430 610 H474 M432 622 H472" stroke="#a51515" stroke-width="2"/>
+    <rect x="440" y="642" width="24" height="5" fill="#111"/>
+  </g>
+  <!-- enseignes néon -->
+  <g id="neons"></g>
+  <!-- lampadaire -->
+  <circle cx="1285" cy="270" r="230" fill="url(#lglow)" class="lampflick"/>
+  <rect x="1338" y="262" width="8" height="568" fill="#0d0e12"/>
+  <path d="M1342 266 Q1325 246 1288 258" stroke="#0d0e12" stroke-width="6" fill="none"/>
+  <ellipse cx="1284" cy="262" rx="20" ry="7" fill="#f2fff8" filter="url(#glow)" class="lampflick"/>
+  <g transform="translate(1284 272)">
+    <g class="orbit"><circle cx="24" cy="0" r="1.6" fill="#fff8d0"/></g>
+    <g class="orbit" style="animation-duration:3.1s;animation-direction:reverse"><circle cx="0" cy="17" r="1.3" fill="#fff8d0"/></g>
+    <g class="orbit" style="animation-duration:1.8s"><circle cx="-30" cy="6" r="1.2" fill="#fff8d0"/></g>
+  </g>
+  <!-- distributeur bleu -->
+  <ellipse cx="545" cy="690" rx="150" ry="170" fill="url(#bglow)"/>
+  <rect x="485" y="560" width="120" height="270" rx="4" fill="#1d3f94"/>
+  <rect x="495" y="574" width="100" height="112" fill="#bfefff" opacity=".85"/>
+  <g id="blue-products"></g>
+  <rect x="495" y="700" width="100" height="16" fill="#0e1f4d"/>
+  <rect x="505" y="760" width="80" height="34" rx="3" fill="#0a0f1f"/>
+  <rect x="485" y="560" width="120" height="270" rx="4" fill="#000" opacity=".15"/>
+  <!-- LE distributeur -->
+  <ellipse id="machine-halo" cx="702" cy="660" rx="230" ry="230" fill="url(#mglow)"/>
+  <g id="scene-machine">
+    <rect x="622" y="520" width="160" height="310" rx="5" fill="#eef1f5"/>
+    <rect x="622" y="520" width="160" height="30" rx="5" fill="#d0122f"/>
+    <text x="702" y="541" fill="#fff" font-size="15" text-anchor="middle" font-family="DotGothic16, monospace">A × G</text>
+    <rect x="632" y="557" width="140" height="150" fill="#e6f6ff"/>
+    <rect x="632" y="557" width="140" height="150" fill="#bfe8ff" opacity=".35" filter="url(#glow)"/>
+    <g id="mini-products"></g>
+    <rect x="640" y="716" width="96" height="16" rx="2" fill="#0b1710"/>
+    <text x="645" y="728" fill="#7dff9b" font-size="10" font-family="DotGothic16, monospace">いらっしゃいませ</text>
+    <rect x="745" y="716" width="27" height="40" rx="2" fill="#2b2f3a"/>
+    <circle cx="758" cy="748" r="3" fill="#ffcf3a"/>
+    <rect x="640" y="766" width="124" height="40" rx="3" fill="#15171e"/>
+    <rect x="622" y="520" width="12" height="310" fill="#000" opacity=".12"/>
+    <rect x="770" y="520" width="12" height="310" fill="#000" opacity=".18"/>
+  </g>
+  <!-- le chat -->
+  <g id="cat" transform="translate(805 830)">
+    <rect x="-30" y="-75" width="60" height="80" fill="transparent"/>
+    <path class="tail" d="M14 -2 Q34 -4 30 -22 Q28 -32 22 -30 Q28 -22 22 -12 Q18 -6 12 -6 Z" fill="#050507"/>
+    <ellipse cx="0" cy="-20" rx="15" ry="20" fill="#050507"/>
+    <circle cx="0" cy="-44" r="11" fill="#050507"/>
+    <path d="M-10 -50 L-9 -63 L-2 -53 Z M10 -50 L9 -63 L2 -53 Z" fill="#050507"/>
+    <g id="cat-eyes"><g class="blink-eyes"><ellipse cx="-4" cy="-45" rx="2.4" ry="2" fill="#d6ff6a" filter="url(#glow)"/><ellipse cx="4" cy="-45" rx="2.4" ry="2" fill="#d6ff6a" filter="url(#glow)"/></g></g>
+  </g>
+  <!-- parapluie transparent oublié -->
+  <path d="M464 760 L476 760 L473 822 L467 822 Z" fill="#dff0ff" opacity=".3" stroke="#ffffff" stroke-opacity=".45"/>
+  <line x1="470" y1="748" x2="470" y2="830" stroke="#cfd6de" stroke-width="2"/>
+  <path d="M470 748 q0 -9 -7 -8" stroke="#cfd6de" stroke-width="2.5" fill="none"/>
+  <!-- vapeur -->
+  <g class="steam"><circle cx="916" cy="582" r="6" fill="#dfe7f0"/><circle cx="912" cy="582" r="7" fill="#dfe7f0" style="animation-delay:-1.3s"/><circle cx="920" cy="582" r="5" fill="#dfe7f0" style="animation-delay:-2.6s"/></g>
+  <!-- petit sanctuaire -->
+  <g id="shrine">
+    <circle cx="930" cy="768" r="46" fill="url(#rglow)" opacity=".45"/>
+    <polygon points="890,768 934,768 947,754 906,754" fill="#7a7c84"/><polygon points="934,768 934,790 946.5,774.0 946.5,753.8" fill="#45474e"/>
+    <rect x="890" y="768" width="44" height="22" fill="#5d5f66"/>
+    <polygon points="928,742 928,768 939.3,755.5 939.3,731.4" fill="#4a2c18"/>
+    <rect x="896" y="742" width="32" height="26" fill="#6b4226"/><rect x="904" y="750" width="16" height="18" fill="#2a160c"/>
+    <path d="M888 745 L912 728 L936 745 Z" fill="#26282e"/>
+    <circle cx="900" cy="764" r="2.5" fill="#ffcf70" filter="url(#glow)" class="neon-flicker"/><circle cx="924" cy="764" r="2.5" fill="#ffcf70" filter="url(#glow)"/>
+    <g fill="#c8242c"><rect x="946" y="758" width="4" height="34"/><rect x="966" y="758" width="4" height="34"/><rect x="940" y="752" width="36" height="5" rx="1"/><rect x="944" y="763" width="28" height="3"/></g>
+    <rect x="940" y="750" width="36" height="2" fill="#111"/>
+    <rect x="880" y="720" width="105" height="80" fill="transparent"/>
+  </g>
+  <!-- neige du 24 -->
+  <g id="snowcover" display="none"></g>
+  <!-- reflets sur le sol mouillé -->
+  <g opacity=".55" filter="url(#soft)">
+    <rect x="632" y="836" width="140" height="120" fill="#bfe8ff" opacity=".35"/>
+    <rect x="495" y="836" width="100" height="90" fill="#4fd6ff" opacity=".3"/>
+    <rect x="430" y="836" width="44" height="60" fill="#ff3a3a" opacity=".35"/>
+    <rect x="110" y="836" width="54" height="80" fill="#ff4fa3" opacity=".25"/>
+    <rect x="1385" y="836" width="200" height="110" fill="#dff3ff" opacity=".25"/>
+    <rect x="1290" y="836" width="34" height="100" fill="#ff4fa3" opacity=".3"/>
+  </g>
+  <ellipse cx="700" cy="905" rx="190" ry="22" fill="#9fdcff" opacity=".07"/>
+  <ellipse cx="380" cy="930" rx="70" ry="12" fill="#ff4f6d" opacity=".07"/>
+  <ellipse cx="1150" cy="900" rx="140" ry="16" fill="#c6ffe6" opacity=".07"/>
+  <ellipse cx="250" cy="900" rx="40" ry="9" fill="none" stroke="#2a2d36" stroke-width="3"/>
+  <!-- câbles -->
+  <path d="M-10 60 Q500 150 1610 40" stroke="#06070a" stroke-width="3" fill="none"/>
+  <path d="M-10 110 Q700 200 1610 100" stroke="#06070a" stroke-width="2" fill="none"/>
+  <path d="M300 -10 Q420 110 900 -10" stroke="#06070a" stroke-width="2" fill="none"/>
+  <rect x="0" y="0" width="1600" height="1000" fill="url(#vignette)" pointer-events="none"/>
+</svg>
+</div>
+<canvas id="rain"></canvas>
+<div id="fade"></div>
+
+<div class="street-ui" id="street-ui">
+  <div class="clock"><span class="clock-time" id="clock-time">--:--</span><span class="clock-sub" id="clock-sub"></span></div>
+  <div class="street-hint" id="street-hint">Approche-toi du distributeur ✦</div>
+</div>
+<div class="topbtns"><button class="pill" id="mute"></button><button class="pill" id="lang"></button></div>
+
+<!-- ======================= ÉCRAN D'ENTRÉE ======================= -->
+<div id="intro">
+  <div class="intro-jp">深夜の自販機</div>
+  <div class="intro-fr">Le distributeur de minuit</div>
+  <div class="intro-sub" id="intro-sub"></div>
+  <button class="enter" id="enter">Entrer ▸</button>
+  <div class="intro-note">🎧 avec le son, c'est mieux</div>
+</div>
+
+<!-- ======================= LE DISTRIBUTEUR DE PRÈS ======================= -->
+<div id="closeup">
+  <button class="pill back" id="back">← La rue</button>
+  <div class="closeup-inner">
+    <div class="vm-holder" id="vm-holder">
+      <div class="vm" id="vm"><div class="vm-inner" id="vm-inner">
+        <div class="vm-head"><span class="vm-logo" data-t="sign"></span><span class="vm-brand">A × G drinks</span></div>
+        <div class="bezel">
+          <div class="glass" id="glass">
+            <div class="tube"></div>
+            <div class="side-leds l" id="leds-l"></div>
+            <div class="side-leds r" id="leds-r"></div>
+            <div id="shelves"></div>
+          </div>
+        </div>
+        <div class="vm-panel"><div class="lcd" id="lcd"></div><div class="coin"><i></i><b></b></div></div>
+        <button class="flap" id="flap"><span class="flap-label" data-t="tray"></span><span class="take">Récupère ta boisson ↓</span></button>
+      </div></div>
+    </div>
+    <aside class="panel">
+      <h3>Ta collection <span id="count"></span></h3>
+      <div class="time-label" id="time-label"></div>
+      <div class="collection" id="collection"></div>
+      <div class="fragments" id="fragments"></div>
+      <p class="hint" id="hint"></p>
+    </aside>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal" hidden>
+  <article class="card" role="dialog" aria-modal="true">
+    <button class="close" id="close" aria-label="Fermer">×</button>
+    <div class="card-head"><span id="m-day"></span><span id="m-time"></span></div>
+    <span class="chip" id="m-tag"></span>
+    <h2 id="m-title"></h2>
+    <p class="romaji" id="m-romaji" hidden></p>
+    <p class="artist" id="m-artist"></p>
+    <div class="tabs" id="m-tabs"></div>
+    <div class="player" id="m-player"></div>
+    <div class="yt-link" id="m-yt"></div>
+    <p class="info" id="m-info"></p>
+    <div class="mot" id="m-mot" hidden></div>
+    <div class="bonus" id="m-bonus"></div>
+  </article>
+</div>
+
+<div class="omikuji-bg" id="omikuji" hidden>
+  <div class="omikuji"><div class="ok-title">おみくじ</div><div class="ok-kanji" id="ok-kanji"></div><div class="ok-read" id="ok-read"></div><div class="ok-text" id="ok-text"></div><div class="ok-close">clique pour refermer</div></div>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<div class="testbar" id="testbar" hidden>
+  🧪 <button id="t-prev">◀</button><span class="d" id="t-day"></span><button id="t-next">▶</button><button id="t-reset">Vider</button>
+</div>
+
+<script>
+/* =====================================================================
+   ✏️  ZONE À REMPLIR  — tout ce que tu as à modifier est ici
+   ---------------------------------------------------------------------
+   - videos : colle l'URL YouTube complète (ou juste l'ID). "" = « vidéo à venir ».
+   - info   : petit texte de présentation (brouillon : réécris-le).
+   - mot    : ton mot perso du jour ("" pour ne rien afficher).
+   - romaji / fr : lecture et traduction des titres japonais.
+   ===================================================================== */
+
+// Texte sous le titre de l'écran d'entrée
+/* Messages écrits avec les fenêtres du grand immeuble (au fond à gauche).
+   jour : "TEXTE"  — lettres A-Z, chiffres, × ♥ / ! ? — 4 caractères max (5 si étroits). */
+const WINDOW_MSG = { 13: "A×G", 24: "2403" };
+// Message affiché avec le code secret (Konami : ↑ ↑ ↓ ↓ ← → ← → B A)
+const SECRET_MSG = "A×G";
+
+/* Les prédictions du petit sanctuaire (clic sur le torii). [kanji, lecture, texte] */
+const OMIKUJI = [
+  ["大吉", "daikichi · grande chance", "Aujourd'hui, personne ne te parlera au travail. Savoure."],
+  ["中吉", "chūkichi · bonne chance", "Une boisson t'attend dans un distributeur. C'est plus que ce que la plupart des gens auront aujourd'hui."],
+  ["小吉", "shōkichi · petite chance", "Maggie t'aime. Elle ne le dira jamais, mais c'est noté."],
+  ["吉", "kichi · chance", "Le distributeur est de ton côté. Le reste du monde, on verra."],
+  ["末吉", "suekichi · chance à venir", "Quelqu'un pense à toi en ce moment. Pas de nom, mais il est franco-espagnol."],
+  ["凶", "kyō · malchance", "Le kami est en pause. Repasse demain, il aura bu son café."]
+];
+
+/* Musiques et sons perso (optionnel). Mets tes fichiers dans un dossier « audio »
+   à côté de index.html, puis écris leur chemin ici. "" = son généré automatiquement. */
+const MUSIC_FILES = {
+  rue: "",        // ex : "audio/rue.mp3"       — boucle dans la rue
+  machine: "",    // ex : "audio/machine.mp3"   — boucle devant le distributeur
+  ouverture: "",  // ex : "audio/ouverture.mp3" — quand une boisson s'ouvre
+  fragment: "",   // ex : "audio/fragment.mp3"  — quand un fragment est trouvé
+  final: ""       // ex : "audio/final.mp3"     — le mot de passe du 24
+};
+
+const INTRO_TEXT = "24 nuits, 24 boissons. Une par jour, pas plus. TODO : ton petit mot d'accueil.";
+
+const YEAR = 2026;
+const FRAGMENTS = ["???", "???", "???", "???"];   // mot de passe du light novel (jours 3, 11, 15, 20)
+const FINAL_MSG = `TODO : ton mot du 24.`;
+
+const DAYS = [
+  { title: "KING", artist: "Kanaria", tag: "Valeur sûre",
+    videos: [{ label: "Clip", url: "https://youtu.be/cm-l2h6GB8Q" }],
+    info: "Tu connais Kanaria, tu connais BRAIN. Mais celle-là, c'est son plus gros succès, et elle manquait à ta playlist.",
+    mot: "" },
+  { title: "アンハッピーリフレイン", romaji: "Unhappy Refrain", fr: "Refrain malheureux", artist: "wowaka", tag: "L'ancêtre",
+    videos: [{ label: "Clip", url: "https://youtu.be/uMlv9VWAxko" }],
+    info: "Avant syudou, avant Kanaria, il y avait wowaka. Une bonne partie de ta playlist descend un peu de lui.",
+    mot: "" },
+  { title: "脳内革命ガール", romaji: "Nōnai Kakumei Girl", fr: "La fille à la révolution dans la tête", artist: "MARETU", tag: "L'original",
+    videos: [{ label: "Clip", url: "https://youtu.be/sjr-tPFADpM" }],
+    info: "Tu connais la version d'Ado. Voilà d'où elle vient.",
+    mot: "", bonus: { type: "fragment", index: 0 } },
+  { title: "ベノム", romaji: "Venom", fr: "Venin", artist: "かいりきベア (Kairiki Bear)", tag: "Découverte",
+    videos: [{ label: "Clip", url: "https://youtu.be/oRJBwaZ59fQ" }],
+    info: "Quelque part entre syudou et Kanaria. Normalement, tu devrais te sentir chez toi.",
+    mot: "" },
+  { title: "BIRDBRAIN", artist: "feat. Kasane Teto", tag: "Découverte",
+    videos: [{ label: "Clip", url: "https://youtu.be/0iVlSNpq8i8" }],
+    info: "Encore de la Teto, parce qu'on ne s'en lasse pas.",
+    mot: "" },
+  { title: "crossing field", artist: "LiSA — OP de Sword Art Online", tag: "Guilty pleasure",
+    videos: [{ label: "Version anime", url: "https://youtu.be/Y4kfe8R1Iqs" }, { label: "Version longue", url: "https://youtu.be/KId6eunoiWk" }],
+    info: "Elle est dans ton top 15 des openings. Je n'ai rien dit. Je constate.",
+    mot: "", bonus: { type: "panne", taps: 7 } },
+  { title: "砂の惑星", romaji: "Suna no Wakusei", fr: "La planète de sable", artist: "ハチ (Hachi)", tag: "L'original",
+    videos: [{ label: "Clip", url: "https://youtu.be/AS4q9yaWJkI" }],
+    info: "Hachi, c'est Kenshi Yonezu à l'époque où il faisait du Vocaloid. Même histoire que balloon et Keina Suda… retiens bien ça.",
+    mot: "" },
+  { title: "群青日和", romaji: "Gunjō Biyori", fr: "Un temps bleu outremer", artist: "東京事変 (Tokyo Jihen)", tag: "Découverte",
+    videos: [{ label: "Clip", url: "" }],
+    info: "Le groupe de Shiina Ringo. Retiens ce nom, il revient bientôt.",
+    mot: "" },
+  { title: "夢の島思念公園", romaji: "Yume no Shima Shinen Kōen", fr: "Le parc des pensées de l'île des rêves", artist: "平沢進 (Susumu Hirasawa) — OP de Paranoia Agent", tag: "Jour anime",
+    videos: [{ label: "Version anime", url: "https://youtu.be/UJaEUN9Q_cg" }, { label: "Version longue", url: "https://youtu.be/pvJB6RuK4Nc" }],
+    info: "Si tu as aimé l'opening de Lain, celui-là est de la même famille de bizarre.",
+    mot: "", bonus: { type: "objet", emoji: "🐈‍⬛", text: "Objet trouvé dans le bac : Maggie.\nPersonne ne sait comment elle est rentrée là-dedans. Elle refuse de répondre aux questions." } },
+  { title: "よふかしのうた", romaji: "Yofukashi no Uta", fr: "La chanson de la nuit blanche", artist: "Creepy Nuts — ED de Call of the Night", tag: "De ta playlist",
+    videos: [{ label: "Version anime", url: "https://youtu.be/PvyaVqfylu4" }, { label: "Version longue", url: "https://youtu.be/F6_zbnfxoBA" }],
+    info: "« La chanson de la nuit blanche », dans un calendrier qui se passe la nuit. Elle ne pouvait pas être ailleurs.",
+    mot: "" },
+  { title: "罪と罰", romaji: "Tsumi to Batsu", fr: "Crime et châtiment", artist: "椎名林檎 (Shiina Ringo) — reprise par Ado et BLiSTAR", tag: "Duel de covers",
+    videos: [{ label: "Version Ado", url: "https://youtu.be/x1UsJ2Znjk0" }, { label: "Version BLiSTAR", url: "https://youtu.be/dSXvVmwJxh4" }],
+    info: "La même chanson, deux époques : Ado d'un côté, BLiSTAR de l'autre. À toi de choisir ton camp.",
+    mot: "", bonus: { type: "fragment", index: 1 } },
+  { title: "ブレインロット", romaji: "Brain Rot", fr: "Pourriture cérébrale", artist: "東京真中 (Tokyo Manaka) feat. Kasane Teto", tag: "De ta playlist",
+    videos: [{ label: "Clip", url: "https://youtu.be/UsjsYMo3O1Q" }],
+    info: "Elle est dans ta playlist. Pas besoin de justification : le titre parle de lui-même.",
+    mot: "" },
+  { title: "Breed", artist: "Nirvana — OP de Green Yuri", tag: "L'intrus · minuit",
+    videos: [{ label: "Version longue", url: "https://youtu.be/tGc8jL4dzao" }],
+    info: "Minuit pile. L'opening d'un anime qui sort en janvier 2027 : tu l'as en avant-première.",
+    mot: "", bonus: { type: "mot", text: "TODO : le mot de minuit." } },
+  { title: "world.execute(me);", artist: "Mili", tag: "Découverte",
+    videos: [{ label: "Clip", url: "https://youtu.be/ESx_hy1n7HA" }],
+    info: "Bizarre, un peu gothique, très identitaire. Je pense que tu vas aimer.",
+    mot: "" },
+  { title: "雨とペトラ", romaji: "Ame to Petra", fr: "La pluie et Petra", artist: "バルーン (balloon)", tag: "L'indice",
+    videos: [{ label: "Clip", url: "https://youtu.be/PdfdOhYVU40" }, { label: "Version cover par Eve", url: "https://youtu.be/jU1Kl2e08wM"}],
+    info: "Un vieux balloon. Tu sais qui il est devenu. Garde ça en tête jusqu'à la fin.",
+    mot: "", bonus: { type: "fragment", index: 2 } },
+  { title: "あぶく", romaji: "Abuku", fr: "Bulles d'écume", artist: "ヨルシカ (Yorushika)", tag: "Découverte",
+    videos: [{ label: "Clip", url: "https://youtu.be/OHAjc-ayhus" }],
+    info: "On entre dans le cœur de la nuit. On baisse le volume.",
+    mot: "" },
+  { title: "ばいばいまたあした", romaji: "Bye bye mata ashita", fr: "Au revoir, à demain", artist: "ロクデナシ (Rokudenashi)", tag: "De ta playlist",
+    videos: [{ label: "Clip", url: "https://youtu.be/4euwConref0" }],
+    info: "« Bye bye, à demain. » Pour un calendrier, difficile de faire plus adapté.",
+    mot: "", bonus: { type: "bon", text: "BON POUR un light novel de ton choix, que je lis vraiment.", small: "Vraiment vraiment. Pas comme la première fois." } },
+  { title: "堕天", romaji: "Daten", fr: "La chute du ciel", artist: "Creepy Nuts — OP de Call of the Night", tag: "De ta playlist",
+    videos: [{ label: "Version anime", url: "https://youtu.be/L96VbQ9ytWk" }, { label: "Version longue", url: "https://youtu.be/HRL5Cp_mPeo" }],
+    info: "L'opening, quatre heures après l'ending. Call of the Night a eu droit à toute la nuit.",
+    mot: "" },
+  { title: "In Love With Myself", artist: "Petite Meller — Cyberpunk: Edgerunners 2", tag: "3h du matin",
+    videos: [{ label: "Clip", url: "https://youtu.be/gKoaAow1XLY" }],
+    info: "TODO : pourquoi celle-là.",
+    mot: "" },
+  { title: "the WORLD", artist: "ナイトメア (Nightmare) — OP 1 de Death Note", tag: "Jour anime",
+    videos: [{ label: "Version anime", url: "https://youtu.be/Bt3D3Ca9nww" }],
+    info: "Il est dans ton top 15 des openings. Certains classiques méritent leur place, même à 3h30 du matin.",
+    mot: "", bonus: { type: "fragment", index: 3 } },
+  { title: "To All of You", artist: "Syd Matters", tag: "L'intrus #2",
+    videos: [{ label: "Clip", url: "https://youtu.be/AoHFCLxTkE4" }],
+    info: "Un artiste que tu aimes, un son de Life is Strange 1. Le seul, le vrai.",
+    mot: "" },
+  { title: "Fly Me to the Moon", artist: "ED de Neon Genesis Evangelion", tag: "Le ciel pâlit",
+    videos: [{ label: "Version anime", url: "https://youtu.be/Cs7eTA1ct8k" }, { label: "Version longue (Megumi Hayashibara)", url: "https://youtu.be/KPRMUvxqVF4" }],
+    info: "Tu connais la version de CLAIRE. Celle-là, c'est la doubleuse de Rei qui chante.",
+    mot: "" },
+  { title: "アイリスアウト", romaji: "Iris Out", fr: "Iris Out", artist: "米津玄師 (Kenshi Yonezu)", tag: "La dernière avant l'aube",
+    videos: [{ label: "Version anime", url: "https://youtu.be/QXwdy4UpHrg" }],
+    info: "Plus qu'une case.",
+    mot: "" },
+  { title: "veil", artist: "須田景凪 (Keina Suda)", tag: "L'aube",
+    videos: [{ label: "Version anime", url: "https://youtu.be/JoMj7UjuXVY" }, { label: "Clip", url: "https://youtu.be/n7VZxg9pxkg" }],
+    info: "La première chanson japonaise que tu m'as fait écouter.",
+    mot: "", final: true }
+];
+
+/* ============================ fin de la zone à remplir ============================ */
+
+const DRINKS = [
+  ["can", "#d7263d", "#ffffff"], ["pet", "#c4cf7a", "#2e7d32", "#2e7d32"], ["slim", "#3b2416", "#c9a24a"],
+  ["pet", "#e8f6ff", "#3aa0e0", "#1b6fb3"], ["can", "#18181c", "#f5d000"], ["pet", "#d8b48c", "#f4ead8", "#8a5a2b"],
+  ["can", "#9fd8f5", "#ffffff"], ["slim", "#151515", "#b8b8b8"], ["pet", "#ff9a1f", "#ff6a00", "#ffffff"],
+  ["can", "#3fbf5f", "#e9ffe8"], ["pet", "#eef8ff", "#1f5fbf", "#1f5fbf"], ["can", "#f2f6ff", "#2a4dbb"],
+  ["slim", "#c89b6d", "#fff6e8"], ["pet", "#a8642a", "#5a2e10", "#a01e1e"], ["can", "#6b2d8a", "#d9b8ff"],
+  ["pet", "#fff3a6", "#ffd400", "#ffd400"], ["can", "#ffb3a7", "#ffffff"], ["slim", "#5a1e14", "#e0c070"],
+  ["pet", "#c98a3c", "#e8d2a0", "#7a4a12"], ["can", "#3f7fd9", "#e6f2ff"], ["pet", "#ffc8d8", "#ff5c8a", "#ff5c8a"],
+  ["can", "#c0262c", "#2f8a3a"], ["slim", "#6aa84f", "#f5f9ee"], ["can", "#d4af37", "#1b1b22"]
+];
+
+const I18N = {
+  jp: { sign: "深夜の自販機", welcome: "いらっしゃいませ", locked: "準備中", push: "押して", sold: "売切", tray: "取出口",
+        clonk: "ガコン！", thanks: "ありがとうございました", broken: "故障中", sleep: "準備中…", btn: "<b>あ</b> / A", meow: "にゃ" },
+  fr: { sign: "Le distributeur de minuit", welcome: "Bienvenue", locked: "Bientôt", push: "Appuie", sold: "Épuisé", tray: "Sortie",
+        clonk: "Clonk !", thanks: "Merci beaucoup", broken: "Hors service", sleep: "En veille…", btn: "あ / <b>A</b>", meow: "Miaou" }
+};
+
+/* ---------------- État ---------------- */
+const params = new URLSearchParams(location.search);
+const TEST = params.has("test");
+const STORE_KEY = "ag-jihanki-2026" + (TEST ? "-test" : "");
+function load(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+let state = load(STORE_KEY, { opened: [], repaired: false });
+let lang = load("ag-lang", "jp");
+const t = k => I18N[lang][k];
+const $ = id => document.getElementById(id);
+
+function realUnlocked() {
+  const now = new Date(), y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
+  if (y > YEAR) return 24;
+  if (y < YEAR || m < 11) return 0;
+  return Math.min(d, 24);
+}
+let unlocked = TEST ? Math.max(1, Math.min(24, parseInt(params.get("test"), 10) || 1)) : realUnlocked();
+function timeOf(day) { const min = 18 * 60 + (day - 1) * 30, h = Math.floor(min / 60) % 24, mm = min % 60; return `${String(h).padStart(2, "0")}:${String(mm).padStart(2, "0")}`; }
+function momentOf(day) {
+  if (day >= 24) return "L'aube";
+  const x = (day - 1) / 23;
+  return x < .14 ? "Crépuscule" : x < .46 ? "Soirée" : x < .56 ? "Minuit" : x < .84 ? "Cœur de la nuit" : "Fin de nuit";
+}
+
+/* =====================================================================
+   SON — tout est fabriqué en direct avec Web Audio (aucun fichier)
+   ===================================================================== */
+const Sound = (() => {
+  let mSend, ctx, master, music, musicLP, sfx, rainG, humG, delay, timer = null, nextT = 0, step = 0, mode = "off";
+  let muted = load("ag-mute", false);
+  const hz = n => 440 * Math.pow(2, (n - 69) / 12);
+  const CHORDS = [[53, 57, 60, 64], [52, 55, 59, 62], [50, 53, 57, 60], [48, 52, 55, 59]]; // Fmaj7 Em7 Dm7 Cmaj7
+  const BOX = [72, 76, 79, 84, 81, 79, 76, 74, 71, 74, 79, 83, 81, 79, 74, 71, 69, 72, 76, 81, 79, 76, 72, 69, 67, 71, 74, 79, 76, 74, 71, 67];
+
+  function init() {
+    if (ctx) { if (ctx.state === "suspended") ctx.resume(); return; }
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain(); master.gain.value = muted ? 0 : .9; master.connect(ctx.destination);
+    delay = ctx.createDelay(); delay.delayTime.value = .33;
+    const fb = ctx.createGain(); fb.gain.value = .35; const wet = ctx.createGain(); wet.gain.value = .3;
+    delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(master);
+    music = ctx.createGain(); music.gain.value = 0;
+    musicLP = ctx.createBiquadFilter(); musicLP.type = "lowpass"; musicLP.frequency.value = 1800;
+    music.connect(musicLP); musicLP.connect(master); mSend = ctx.createGain(); mSend.gain.value = .12; musicLP.connect(mSend); mSend.connect(delay);
+    sfx = ctx.createGain(); sfx.gain.value = .8; sfx.connect(master);
+    const sfxSend = ctx.createGain(); sfxSend.gain.value = .25; sfx.connect(sfxSend); sfxSend.connect(delay);
+    // pluie
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
+    const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 900;
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 6500;
+    rainG = ctx.createGain(); rainG.gain.value = 0;
+    src.connect(hp); hp.connect(lp); lp.connect(rainG); rainG.connect(master); src.start();
+    // ronronnement du distributeur
+    humG = ctx.createGain(); humG.gain.value = 0; humG.connect(master);
+    [[50, 1], [100, .5], [150, .15]].forEach(([f, g]) => { const o = ctx.createOscillator(), gg = ctx.createGain(); o.frequency.value = f; gg.gain.value = g; o.connect(gg); gg.connect(humG); o.start(); });
+    timer = setInterval(schedule, 40);
+  }
+  const ramp = (p, v, s = .8) => { if (!ctx) return; p.cancelScheduledValues(ctx.currentTime); p.setTargetAtTime(v, ctx.currentTime, s / 3); };
+
+  // fichiers audio perso
+  const files = {};
+  for (const k in MUSIC_FILES) if (MUSIC_FILES[k]) { const a = new Audio(MUSIC_FILES[k]); a.preload = "auto"; if (k === "rue" || k === "machine") { a.loop = true; a.volume = 0; } a._t = 0; files[k] = a; }
+  function fadeFile(a, target) {
+    if (!a) return; a._t = target; clearInterval(a._f);
+    if (target > 0 && a.paused) a.play().catch(() => {});
+    a._f = setInterval(() => {
+      const goal = muted ? 0 : a._t;
+      a.volume = Math.max(0, Math.min(1, a.volume + (goal - a.volume) * .12));
+      if (Math.abs(a.volume - goal) < .01) { a.volume = goal; clearInterval(a._f); if (goal === 0) a.pause(); }
+    }, 50);
+  }
+  function playFile(k) { const a = files[k]; if (!a) return false; const c = a.cloneNode(); c.volume = muted ? 0 : .85; c.play().catch(() => {}); return true; }
+  let rainFactor = 1;
+  function setRainFactor(f) { rainFactor = f; if (ctx) setMode(mode, true); }
+
+  function setMode(m, force) {
+    if (!ctx) { mode = m; return; }
+    const prev = mode; mode = m;
+    const genStreet = files.rue ? 0 : .5, genMachine = files.machine ? 0 : .55;
+    if (m === "street") { ramp(music.gain, genStreet); ramp(musicLP.frequency, 1700); ramp(rainG.gain, .045 * rainFactor); ramp(humG.gain, 0); ramp(mSend.gain, .12); fadeFile(files.rue, .6); fadeFile(files.machine, 0); }
+    if (m === "machine") { ramp(music.gain, genMachine); ramp(musicLP.frequency, 5000); ramp(rainG.gain, .014 * rainFactor); ramp(humG.gain, .012); ramp(mSend.gain, 0, .3); fadeFile(files.rue, 0); fadeFile(files.machine, .6); }
+    if (m === "quiet") { ramp(music.gain, 0, .5); ramp(rainG.gain, .006 * rainFactor, .5); ramp(humG.gain, .003, .5); fadeFile(files.rue, 0); fadeFile(files.machine, 0); }
+    if (prev !== m && (m === "street" || m === "machine")) {
+      // on coupe net ce qui sonnait encore et on repart sur un bus neuf : plus de musique en double
+      const old = music; old.gain.cancelScheduledValues(ctx.currentTime); old.gain.setTargetAtTime(0, ctx.currentTime, .15);
+      setTimeout(() => old.disconnect(), 1500);
+      music = ctx.createGain(); music.gain.value = 0; music.connect(musicLP);
+      ramp(music.gain, m === "street" ? genStreet : genMachine);
+      step = 0; nextT = ctx.currentTime + .25;
+    }
+  }
+
+  function voice(type, f, t0, peak, att, dec, dest = music, detune = 0) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.value = f; o.detune.value = detune;
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(peak, t0 + att); g.gain.exponentialRampToValueAtTime(.0001, t0 + att + dec);
+    o.connect(g); g.connect(dest); o.start(t0); o.stop(t0 + att + dec + .05);
+  }
+  function noise(t0, dur, freq, q, peak, dest = sfx) {
+    const n = Math.floor(ctx.sampleRate * dur), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    const s = ctx.createBufferSource(); s.buffer = b;
+    const f = ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = freq; f.Q.value = q;
+    const g = ctx.createGain(); g.gain.value = peak;
+    s.connect(f); f.connect(g); g.connect(dest); s.start(t0);
+  }
+
+  function schedule() {
+    if (!ctx || (mode !== "street" && mode !== "machine")) return;
+    if ((mode === "street" && files.rue) || (mode === "machine" && files.machine)) { nextT = ctx.currentTime; return; }
+    while (nextT < ctx.currentTime + .25) {
+      if (mode === "street") {           // lo-fi de nuit, 80 bpm
+        const dur = .375, chord = CHORDS[Math.floor(step / 8) % 4];
+        if (step % 8 === 0) {
+          chord.forEach(n => { voice("triangle", hz(n), nextT, .028, .5, 3.2, music, -6); voice("triangle", hz(n), nextT, .028, .5, 3.2, music, 6); });
+          voice("sine", hz(chord[0] - 12), nextT, .09, .02, 2.6);
+        }
+        if ([3, 5, 6].includes(step % 8) && Math.random() < .55) {
+          const n = chord[Math.floor(Math.random() * 4)] + 12;
+          voice("sine", hz(n), nextT, .05, .01, 1.4); voice("sine", hz(n * 1) * 2, nextT, .012, .01, .5);
+        }
+        if (Math.random() < .5) noise(nextT + Math.random() * .3, .004, 3000, .7, .05, master);
+        nextT += dur;
+      } else {                           // boîte à musique du distributeur
+        const dur = .3, n = BOX[step % BOX.length];
+        voice("sine", hz(n), nextT, .06, .005, 1.3); voice("sine", hz(n) * 4, nextT, .012, .002, .25);
+        if (step % 8 === 0) voice("sine", hz(CHORDS[Math.floor(step / 8) % 4][0] - 12), nextT, .05, .02, 2);
+        nextT += dur;
+      }
+      step++;
+    }
+  }
+
+  // ---- bruitages ----
+  function clank() {
+    if (!ctx) return; const t0 = ctx.currentTime;
+    [[0, 1], [.17, .5], [.29, .22]].forEach(([dt, k]) => {
+      const base = 380 + Math.random() * 60, t1 = t0 + dt;
+      [[1, .14, 1.0], [2.76, .09, .7], [5.4, .06, .45], [8.93, .035, .3]].forEach(([r, g, d]) => voice("sine", base * r, t1, g * k, .002, d, sfx));
+      noise(t1, .04, 2800, 1.2, .5 * k);
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.frequency.setValueAtTime(140, t1); o.frequency.exponentialRampToValueAtTime(45, t1 + .18);
+      g.gain.setValueAtTime(.45 * k, t1); g.gain.exponentialRampToValueAtTime(.001, t1 + .22);
+      o.connect(g); g.connect(sfx); o.start(t1); o.stop(t1 + .25);
+    });
+  }
+  function beep() { if (!ctx) return; voice("square", 1320, ctx.currentTime, .05, .002, .07, sfx); }
+  function bang() {
+    if (!ctx) return; const t0 = ctx.currentTime;
+    noise(t0, .06, 400, .8, .9);
+    [[1, .12, .5], [2.3, .05, .3]].forEach(([r, g, d]) => voice("sine", 160 * r, t0, g, .002, d, sfx));
+  }
+  function jingle() { if (!ctx || playFile("ouverture")) return; const t0 = ctx.currentTime + .05; [84, 88, 91, 96, 91, 96].forEach((n, i) => { voice("sine", hz(n), t0 + i * .09, .07, .003, .9, sfx); voice("sine", hz(n) * 3, t0 + i * .09, .01, .003, .2, sfx); }); }
+  function sparkle() { if (!ctx || playFile("fragment")) return; const t0 = ctx.currentTime + .05; [84, 91, 88, 96, 93, 100, 98, 103].forEach((n, i) => voice("sine", hz(n), t0 + i * .06, .05, .002, .7, sfx)); voice("triangle", hz(60), t0, .06, .05, 2.5, sfx); }
+  function finale() {
+    if (!ctx || playFile("final")) return; const t0 = ctx.currentTime + .1;
+    [[67, 0], [72, .4], [76, .8], [79, 1.2], [84, 1.8], [83, 2.4], [79, 2.8], [84, 3.4]].forEach(([n, dt]) => voice("sine", hz(n), t0 + dt, .07, .01, 1.6, sfx));
+    [48, 55, 64, 71, 74].forEach(n => voice("triangle", hz(n), t0, .025, 1, 5, sfx));
+  }
+  function meow() {
+    if (!ctx) return; const t0 = ctx.currentTime;
+    const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    o.type = "sawtooth"; f.type = "bandpass"; f.frequency.value = 1300; f.Q.value = 3;
+    o.frequency.setValueAtTime(480, t0); o.frequency.linearRampToValueAtTime(820, t0 + .15); o.frequency.linearRampToValueAtTime(560, t0 + .55);
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(.18, t0 + .06); g.gain.exponentialRampToValueAtTime(.001, t0 + .6);
+    o.connect(f); f.connect(g); g.connect(sfx); o.start(t0); o.stop(t0 + .65);
+  }
+  function buzz() {
+    if (!ctx) return; const t0 = ctx.currentTime;
+    const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    o.type = "sawtooth"; o.frequency.value = 120; f.type = "bandpass"; f.frequency.value = 500; f.Q.value = 2;
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(.05, t0 + .03); g.gain.setValueAtTime(.02, t0 + .1); g.gain.linearRampToValueAtTime(.05, t0 + .14); g.gain.exponentialRampToValueAtTime(.001, t0 + .4);
+    o.connect(f); f.connect(g); g.connect(sfx); o.start(t0); o.stop(t0 + .45);
+  }
+  function suzu() {
+    if (!ctx) return; const t0 = ctx.currentTime;
+    for (let i = 0; i < 9; i++) { const dt = Math.random() * .45; voice("sine", 2300 + Math.random() * 1200, t0 + dt, .035, .002, .35, sfx); }
+    noise(t0 + .8, .05, 1500, .9, .8); noise(t0 + 1.1, .05, 1500, .9, .8);
+  }
+  function toggleMute() {
+    muted = !muted; save("ag-mute", muted); if (master) ramp(master.gain, muted ? 0 : .9, .2);
+    Object.values(files).forEach(a => { if (a.loop) fadeFile(a, a._t); });
+    return muted;
+  }
+  return { init, setMode, setRainFactor, clank, beep, bang, jingle, sparkle, finale, meow, buzz, suzu, toggleMute, isMuted: () => muted, mode: () => mode };
+})();
+
+/* =====================================================================
+   DÉCOR
+   ===================================================================== */
+function drinkSVG(i, scale = 1) {
+  const [type, body, label, cap] = DRINKS[i];
+  if (type === "pet") return `<svg width="${26 * scale}" height="${66 * scale}" viewBox="0 0 26 66">
+      <rect x="9" y="0" width="8" height="6" rx="1" fill="${cap}"/>
+      <path d="M10 6 H16 V10 Q23 15 23 22 V62 Q23 65 20 65 H6 Q3 65 3 62 V22 Q3 15 10 10 Z" fill="${body}" opacity=".9"/>
+      <rect x="3" y="31" width="20" height="17" fill="${label}"/><rect x="3" y="35" width="20" height="2" fill="#fff" opacity=".5"/>
+      <rect x="5" y="16" width="3" height="44" rx="1.5" fill="#fff" opacity=".45"/><path d="M18 18 V62" stroke="#000" stroke-opacity=".12" stroke-width="3"/></svg>`;
+  if (type === "slim") return `<svg width="${20 * scale}" height="${56 * scale}" viewBox="0 0 20 56">
+      <ellipse cx="10" cy="3" rx="8" ry="2.5" fill="#cfd5dd"/><rect x="2" y="3" width="16" height="51" rx="2" fill="${body}"/>
+      <rect x="2" y="16" width="16" height="22" fill="${label}" opacity=".9"/><rect x="2" y="24" width="16" height="3" fill="${body}" opacity=".6"/>
+      <rect x="4" y="5" width="2.5" height="46" fill="#fff" opacity=".35"/><rect x="13" y="3" width="5" height="51" fill="#000" opacity=".18"/></svg>`;
+  return `<svg width="${28 * scale}" height="${46 * scale}" viewBox="0 0 28 46">
+    <ellipse cx="14" cy="3" rx="11" ry="3" fill="#d6dbe2"/><ellipse cx="14" cy="3" rx="4" ry="1.2" fill="#9aa3ae"/>
+    <rect x="2" y="3" width="24" height="41" rx="3" fill="${body}"/><rect x="2" y="15" width="24" height="12" fill="${label}" opacity=".9"/>
+    <circle cx="14" cy="21" r="3.5" fill="${body}" opacity=".7"/><rect x="5" y="5" width="3" height="37" fill="#fff" opacity=".35"/>
+    <rect x="19" y="3" width="7" height="41" fill="#000" opacity=".16"/></svg>`;
+}
+
+const NS = "http://www.w3.org/2000/svg";
+function svgEl(tag, attrs, parent, text) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text) e.textContent = text; parent.appendChild(e); return e; }
+let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const WINDOWS = []; // fenêtres allumables : { el, r }
+const MSG_CELLS = []; // fenêtres du grand immeuble
+function fan(parent, cx, cy, r) {
+  const g = svgEl("g", { class: "spin slow" }, parent);
+  svgEl("path", { d: `M${cx} ${cy - r} L${cx + 4} ${cy} L${cx} ${cy + r} L${cx - 4} ${cy} Z M${cx - r} ${cy} L${cx} ${cy - 4} L${cx + r} ${cy} L${cx} ${cy + 4} Z`, fill: "#4a4f59" }, g);
+  svgEl("circle", { cx, cy, r: 4, fill: "#1a1c22" }, g);
+}
+const FONT = {
+  A:["010","101","111","101","101"],B:["110","101","110","101","110"],C:["011","100","100","100","011"],D:["110","101","101","101","110"],
+  E:["111","100","110","100","111"],F:["111","100","110","100","100"],G:["011","100","101","101","011"],H:["101","101","111","101","101"],
+  I:["111","010","010","010","111"],J:["001","001","001","101","010"],K:["101","101","110","101","101"],L:["100","100","100","100","111"],
+  M:["101","111","111","101","101"],N:["110","101","101","101","101"],O:["010","101","101","101","010"],P:["110","101","110","100","100"],
+  Q:["010","101","101","110","011"],R:["110","101","110","101","101"],S:["011","100","010","001","110"],T:["111","010","010","010","010"],
+  U:["101","101","101","101","111"],V:["101","101","101","101","010"],W:["101","101","111","111","101"],X:["101","101","010","101","101"],
+  Y:["101","101","010","010","010"],Z:["111","001","010","100","111"],"0":["111","101","101","101","111"],"1":["010","110","010","010","111"],
+  "2":["110","001","010","100","111"],"3":["110","001","010","001","110"],"4":["101","101","111","001","001"],"5":["111","100","110","001","110"],
+  "6":["011","100","111","101","111"],"7":["111","001","010","010","010"],"8":["111","101","111","101","111"],"9":["111","101","111","001","110"],
+  "×":["000","101","010","101","000"],"♥":["000","101","111","111","010"],"/":["001","001","010","100","100"],"!":["010","010","010","000","010"],
+  "?":["110","001","010","000","010"]," ":["000","000","000","000","000"]
+};
+let curWinFrac = .5, secretUntil = 0, snowing = false;
+function buildSnow() {
+  const g = $("snowcover"), shadow = svgEl("g", { fill: "#aebfd8", opacity: .7, transform: "translate(0 2.5)" }, g), top = svgEl("g", { fill: "#f4f8ff" }, g);
+  const add = d => { svgEl("path", { d }, shadow); svgEl("path", { d }, top); };
+  // une couche bosselée posée sur une surface (x, y, largeur, épaisseur)
+  const cap = (x, y, w, h) => {
+    const n = Math.max(3, Math.round(w / 16)), pts = [];
+    for (let i = 0; i <= n; i++) {
+      const edge = i === 0 || i === n ? .25 : 1;
+      pts.push([x - 3 + (w + 6) * i / n, y - h * edge * (.55 + rnd() * .7)]);
+    }
+    let d = `M${x - 4} ${y + 1} L${pts[0][0]} ${pts[0][1]}`;
+    for (let i = 1; i < pts.length; i++) { const mx = (pts[i - 1][0] + pts[i][0]) / 2, my = (pts[i - 1][1] + pts[i][1]) / 2; d += ` Q${pts[i - 1][0]} ${pts[i - 1][1]} ${mx} ${my}`; }
+    d += ` L${x + w + 4} ${y + 1}`;
+    for (let xx = x + w; xx > x; xx -= 9 + rnd() * 14) d += ` Q${xx - 3} ${y + 3 + rnd() * 4} ${xx - 7} ${y + 1}`;
+    add(d + " Z");
+  };
+  [[0, 240, 835, 12], [1350, 190, 250, 12], [378, 102, 240, 7], [0, 175, 120, 6], [190, 160, 130, 6], [570, 185, 110, 6], [690, 170, 150, 6], [1180, 120, 90, 6], [1360, 100, 120, 6],
+   [70, 425, 92, 11], [480, 425, 92, 11], [690, 440, 92, 11], [1500, 500, 80, 9], [944, 560, 24, 5], [1250, 597, 35, 6],
+   [34, 395, 162, 6], [224, 395, 162, 6], [414, 395, 162, 6], [604, 395, 162, 6],
+   [285, 568, 140, 13], [485, 560, 120, 12], [622, 520, 160, 15], [440, 572, 24, 5], [110, 470, 54, 7],
+   [1376, 472, 218, 8], [1298, 777, 34, 10], [1242, 800, 64, 10], [940, 752, 36, 6], [808, 105, 82, 6], [820, 165, 58, 5], [858, 225, 26, 8],
+   [1375, 588, 210, 8], [994, 462, 172, 9], [1016, 498, 128, 5], [941, 693, 29, 5], [1207, 708, 22, 6], [234, 736, 26, 7], [836, 540, 26, 5], [1288, 300, 38, 6], [858, 330, 34, 6]
+  ].forEach(([x, y, w, h]) => cap(x, y, w, h));
+  // toit du petit sanctuaire
+  add("M886 746 L912 726 L938 746 L934 748 L912 733 L890 748 Z");
+  // tas de neige au sol, plus hauts contre les murs et les machines
+  const piles = [[0, 24, 60], [160, 10, 40], [300, 14, 45], [420, 18, 22], [475, 14, 22], [612, 10, 16], [740, 7, 18], [865, 18, 22], [1240, 16, 34], [1335, 18, 22], [1380, 12, 30], [1600, 26, 70]];
+  const hAt = x => 4 + piles.reduce((a, [px, ph, pw]) => a + ph * Math.exp(-((x - px) ** 2) / (2 * pw * pw)), 0);
+  let d = "M-10 860";
+  for (let x = -10; x <= 1610; x += 12) d += ` L${x} ${(830 - hAt(x) - rnd() * 2.5).toFixed(1)}`;
+  add(d + " L1610 860 Z");
+  // congères le long des murs de la ruelle
+  add("M835 831 L1000 691 L1001 697 Q940 752 846 832 Z");
+  add("M1350 831 L1160 691 L1159 697 Q1230 752 1340 832 Z");
+  svgEl("polygon", { points: "835,830 1000,690 1160,690 1350,830", fill: "#eef3ff", opacity: .22 }, g);
+  svgEl("rect", { x: 0, y: 840, width: 1600, height: 160, fill: "#eef3ff", opacity: .12 }, g);
+  // petites traces de pattes jusqu'au chat
+  for (let i = 0; i < 9; i++) {
+    const x = 1010 - i * 22, y = 905 - i * 7 + (i % 2) * 7;
+    svgEl("ellipse", { cx: x, cy: y, rx: 3.2, ry: 2, fill: "#9fb0c9", opacity: .7 }, g);
+  }
+}
+function updateMsgBuilding() {
+  const day = Math.max(1, unlocked);
+  const text = Date.now() < secretUntil ? SECRET_MSG : (unlocked ? WINDOW_MSG[day] : null);
+  const mc = $("msg-cells");
+  if (!text) { mc.removeAttribute("filter"); MSG_CELLS.forEach(c => { c.el.setAttribute("fill", "#ffd98f"); c.el.setAttribute("display", c.r < curWinFrac * .8 ? "inline" : "none"); }); return; }
+  mc.setAttribute("filter", "url(#glow)"); MSG_CELLS.forEach(c => c.el.setAttribute("fill", "#fff3c4"));
+  const chars = [...text.toUpperCase()].filter(ch => FONT[ch]), w = chars.length * 4 - 1, off = Math.max(0, Math.floor((19 - w) / 2));
+  const on = new Set();
+  chars.forEach((ch, i) => FONT[ch].forEach((row, ry) => [...row].forEach((v, rx) => { if (v === "1") on.add(`${ry + 1},${off + i * 4 + rx}`); })));
+  MSG_CELLS.forEach(c => c.el.setAttribute("display", on.has(`${c.row},${c.col}`) ? "inline" : "none"));
+}
+
+function litWindow(parent, x, y, w, h, warm, blinds) {
+  const g = svgEl("g", {}, parent);
+  svgEl("rect", { x, y, width: w, height: h, fill: warm ? "#ffcf8a" : "#bfe6ff", opacity: warm ? .42 : .3 }, g);
+  if (blinds) for (let yy = y + 12; yy < y + h; yy += 12) svgEl("line", { x1: x, y1: yy, x2: x + w, y2: yy, stroke: "#000", "stroke-opacity": .3 }, g);
+  WINDOWS.push({ el: g, r: rnd() });
+}
+
+function buildStreet() {
+  const stars = $("stars");
+  for (let i = 0; i < 90; i++) svgEl("circle", { cx: rnd() * 1600, cy: rnd() * 470, r: rnd() * 1.5 + .3, fill: "#fff", opacity: rnd() * .8 + .2 }, stars);
+
+  // ligne d'immeubles au loin, derrière
+  const sk = $("skyline");
+  [[0, 175, 120], [110, 205, 90], [190, 160, 130], [330, 195, 100], [570, 185, 110], [690, 170, 150],
+   [985, 300, 70], [1050, 250, 60], [1105, 330, 70], [1180, 120, 90], [1260, 160, 100], [1360, 100, 120], [1470, 140, 140]].forEach(([x, y, w]) => {
+    svgEl("rect", { x, y, width: w, height: 600, fill: "#0b0e1c" }, sk);
+  });
+  // le grand immeuble aux fenêtres-messages
+  const mb = svgEl("g", { id: "msg-building" }, sk);
+  svgEl("rect", { x: 378, y: 108, width: 240, height: 600, fill: "#0c1020" }, mb);
+  svgEl("rect", { x: 378, y: 102, width: 240, height: 8, fill: "#080a14" }, mb);
+  const lights = $("lights");
+  const mg = svgEl("g", { id: "msg-cells" }, lights);
+  for (let r = 0; r < 7; r++) for (let c = 0; c < 19; c++) {
+    const el = svgEl("rect", { x: 386 + c * 12, y: 118 + r * 15, width: 7, height: 10, fill: "#ffd98f", opacity: .75 }, mg);
+    MSG_CELLS.push({ el, r: rnd(), row: r, col: c });
+  }
+  [[0, 175, 120], [110, 205, 90], [190, 160, 130], [330, 195, 100], [570, 185, 110], [690, 170, 150]].forEach(([x, y, w]) => {
+    for (let yy = y + 10; yy < 236; yy += 14) for (let xx = x + 8; xx < x + w - 6; xx += 13) if (rnd() > .55) litWindow(lights, xx, yy, 5, 7, rnd() > .4, false);
+  });
+  [[985, 300, 70], [1050, 250, 60], [1105, 330, 70], [1180, 120, 90], [1260, 160, 100]].forEach(([x, y, w]) => {
+    for (let yy = y + 10; yy < 455; yy += 15) for (let xx = x + 7; xx < x + w - 6; xx += 13) if (rnd() > .5) litWindow(lights, xx, yy, 6, 8, rnd() > .45, false);
+  });
+
+  // façade (formes sombres)
+  const f = $("facade");
+  [40, 230, 420, 610].forEach(x => {
+    svgEl("rect", { x, y: 290, width: 150, height: 105, fill: "#0d0e12" }, f);
+    svgEl("rect", { x: x - 6, y: 395, width: 162, height: 8, fill: "#1a1b20" }, f);
+  });
+  [[70, 425], [480, 425], [690, 440]].forEach(([x, y]) => {
+    svgEl("rect", { x, y, width: 92, height: 66, rx: 3, fill: "#6f747d" }, f);
+    svgEl("circle", { cx: x + 36, cy: y + 33, r: 22, fill: "#2b2f37" }, f);
+    fan(f, x + 36, y + 33, 18);
+  });
+  svgEl("line", { x1: 0, y1: 520, x2: 835, y2: 520, stroke: "#3a3d46", "stroke-width": 6 }, f);
+  svgEl("line", { x1: 820, y1: 250, x2: 820, y2: 830, stroke: "#30333b", "stroke-width": 8 }, f);
+  svgEl("line", { x1: 30, y1: 250, x2: 30, y2: 830, stroke: "#30333b", "stroke-width": 6 }, f);
+  // murs de la ruelle : canalisations en perspective
+  [[835, 380, 1000, 535], [835, 560, 1000, 620]].forEach(([a, b, c, d]) => svgEl("line", { x1: a, y1: b, x2: c, y2: d, stroke: "#2c2f37", "stroke-width": 4 }, f));
+  [[1350, 420, 1160, 545], [1350, 640, 1160, 630]].forEach(([a, b, c, d]) => svgEl("line", { x1: a, y1: b, x2: c, y2: d, stroke: "#2a2d35", "stroke-width": 4 }, f));
+  // bâtiment de droite
+  [[1385, 245], [1495, 245], [1385, 380], [1495, 380]].forEach(([x, y]) => svgEl("rect", { x, y, width: 85, height: 95, fill: "#0d0e12" }, f));
+  svgEl("rect", { x: 1500, y: 500, width: 80, height: 58, rx: 3, fill: "#666b74" }, f);
+  svgEl("circle", { cx: 1530, cy: 529, r: 19, fill: "#2b2f37" }, f);
+  fan(f, 1530, 529, 15);
+  for (let x = 1380; x <= 1590; x += 14) svgEl("line", { x1: x, y1: 472, x2: x, y2: 506, stroke: "#2c2f37", "stroke-width": 2 }, f);
+  // linge qui sèche
+  const ld = $("laundry");
+  [[1395, "#c86b6b", "shirt"], [1440, "#e8e2d0", "towel"], [1478, "#6b8fc8", "shirt"], [1522, "#7aa86b", "sock"], [1540, "#7aa86b", "sock"], [1558, "#d9c27a", "towel"]].forEach(([x, col, kind], i) => {
+    const g = svgEl("g", { class: "sway", style: `animation-delay:${-i * .8}s` }, ld);
+    const y = 441 - (x - 1380) * .02;
+    if (kind === "shirt") svgEl("path", { d: `M${x} ${y} l10 0 l4 4 l10 0 l4 -4 l10 0 l6 10 l-7 4 l-3 -4 l0 22 l-30 0 l0 -22 l-3 4 l-7 -4 z`, fill: col }, g);
+    if (kind === "towel") svgEl("rect", { x, y, width: 26, height: 36, fill: col }, g);
+    if (kind === "sock") svgEl("path", { d: `M${x} ${y} h8 v16 h6 v7 h-14 z`, fill: col }, g);
+  });
+  svgEl("rect", { x: 1375, y: 588, width: 210, height: 30, fill: "#0f1015" }, f);
+  svgEl("rect", { x: 1375, y: 625, width: 210, height: 205, fill: "#0e1014" }, f);
+
+  // fenêtres allumables (premier plan)
+  [40, 230, 420, 610].forEach(x => litWindow(lights, x, 290, 150, 105, rnd() > .3, true));
+  [[1385, 245], [1495, 245], [1385, 380], [1495, 380]].forEach(([x, y]) => litWindow(lights, x, y, 85, 95, rnd() > .4, true));
+  litWindow(lights, 1015, 490, 40, 50, true, true); litWindow(lights, 1100, 520, 40, 50, false, true);
+
+  // laverie 24h (bâtiment de droite)
+  const lw = svgEl("g", {}, lights);
+  svgEl("circle", { cx: 1480, cy: 760, r: 200, fill: "url(#wglow)" }, lw);
+  svgEl("rect", { x: 1385, y: 632, width: 190, height: 190, fill: "url(#shutter)", opacity: .92 }, lw);
+  [1420, 1480, 1540].forEach(x => { svgEl("circle", { cx: x, cy: 770, r: 22, fill: "#d6e6ef", stroke: "#7c8a94", "stroke-width": 5 }, lw); const dr = svgEl("g", { class: "spin" }, lw); svgEl("circle", { cx: x, cy: 770, r: 12, fill: "#9fc4d8" }, dr); svgEl("circle", { cx: x + 6, cy: 766, r: 3.5, fill: ["#ff7c9a", "#ffd84f", "#7dd3ff"][(x - 1420) / 60] }, dr); });
+  svgEl("rect", { x: 1395, y: 700, width: 170, height: 24, fill: "#c5d5de" }, lw);
+  svgEl("line", { x1: 1480, y1: 632, x2: 1480, y2: 822, stroke: "#8fa3ae", "stroke-width": 3 }, lw);
+  svgEl("text", { x: 1480, y: 610, fill: "#9fe7ff", "font-size": 18, "text-anchor": "middle", "font-family": "Zen Maru Gothic, sans-serif", filter: "url(#glow)" }, lw, "コインランドリー 24h");
+
+  // fond de ruelle : petit distributeur lointain
+  // fond de ruelle : un petit izakaya encore ouvert
+  const iz = svgEl("g", {}, lights);
+  svgEl("rect", { x: 1000, y: 470, width: 160, height: 220, fill: "#2a1d15" }, iz);
+  svgEl("rect", { x: 994, y: 462, width: 172, height: 10, fill: "#1a120c" }, iz);
+  svgEl("rect", { x: 1016, y: 498, width: 128, height: 26, rx: 2, fill: "#ffdca0" }, iz);
+  svgEl("text", { x: 1080, y: 517, "font-size": 15, "text-anchor": "middle", fill: "#4a1e0a", "font-family": "Zen Maru Gothic, sans-serif", "font-weight": 700 }, iz, "居酒屋 あかり");
+  svgEl("rect", { x: 1010, y: 536, width: 30, height: 22, fill: "#ffcf8a", opacity: .55 }, iz);
+  svgEl("rect", { x: 1120, y: 536, width: 30, height: 22, fill: "#ffcf8a", opacity: .3 }, iz);
+  svgEl("rect", { x: 1030, y: 575, width: 100, height: 115, fill: "#ffb35c", opacity: .88 }, iz);
+  for (let x = 1042; x < 1130; x += 12) svgEl("line", { x1: x, y1: 575, x2: x, y2: 690, stroke: "#6b3a1a", "stroke-width": 1.5 }, iz);
+  [612, 650].forEach(y => svgEl("line", { x1: 1030, y1: y, x2: 1130, y2: y, stroke: "#6b3a1a", "stroke-width": 1.5 }, iz));
+  svgEl("path", { d: "M1062 690 v-38 h10 v38 M1066 668 h2", stroke: "#3a1d0c", "stroke-width": 3, fill: "none", opacity: .55 }, iz);
+  for (let i = 0; i < 4; i++) svgEl("rect", { x: 1030 + i * 25, y: 575, width: 23, height: 38, fill: "#1c2a4a" }, iz);
+  svgEl("text", { x: 1067, y: 600, "font-size": 15, "text-anchor": "middle", fill: "#f3ecdc", "font-family": "Zen Maru Gothic, sans-serif" }, iz, "酒");
+  svgEl("text", { x: 1092, y: 600, "font-size": 15, "text-anchor": "middle", fill: "#f3ecdc", "font-family": "Zen Maru Gothic, sans-serif" }, iz, "処");
+  [1016, 1144].forEach(x => svgEl("ellipse", { cx: x, cy: 600, rx: 8, ry: 11, fill: "#e8342a", filter: "url(#glow)" }, iz));
+  svgEl("circle", { cx: 1080, cy: 640, r: 130, fill: "url(#warm)" }, iz);
+  // deuxième guirlande, plus loin
+  const g2 = svgEl("g", { class: "sway", style: "animation-duration:9s;animation-delay:-2s" }, lights);
+  svgEl("path", { d: "M985 548 Q1080 592 1175 540", stroke: "#0b0c10", "stroke-width": 1.5, fill: "none" }, g2);
+  for (let i = 1; i < 7; i++) {
+    const tt = i / 7, x = (1 - tt) ** 2 * 985 + 2 * (1 - tt) * tt * 1080 + tt ** 2 * 1175, y = (1 - tt) ** 2 * 548 + 2 * (1 - tt) * tt * 592 + tt ** 2 * 540;
+    svgEl("ellipse", { cx: x, cy: y + 6, rx: 4, ry: 5.5, fill: i % 2 ? "#ffb347" : "#ff6a4a", filter: "url(#glow)" }, g2);
+  }
+  // lumières de la ruelle
+  svgEl("polygon", { points: "1190,520 1220,513 1220,560 1190,563", fill: "#ffcf8a", opacity: .45 }, lights);
+  svgEl("circle", { cx: 979, cy: 626, r: 26, fill: "url(#warm)" }, lights);
+  svgEl("circle", { cx: 979, cy: 626, r: 3, fill: "#ffe2a8", filter: "url(#glow)" }, lights);
+  svgEl("rect", { x: 1212, y: 744, width: 12, height: 4, rx: 2, fill: "#ff3030", filter: "url(#glow)" }, lights);
+  // flaques colorées dans la ruelle
+  const pz = svgEl("g", { filter: "url(#soft)" }, lights);
+  [[905, 805, 40, 8, "#ff8a3a"], [1240, 768, 35, 7, "#4fe0ff"], [1300, 815, 45, 9, "#ff4fa3"], [1080, 705, 70, 8, "#ffb35c"], [1000, 760, 30, 6, "#7dffb0"]]
+    .forEach(([cx, cy, rx, ry, c]) => svgEl("ellipse", { cx, cy, rx, ry, fill: c, opacity: .3 }, pz));
+
+  // guirlande de lanternes au-dessus de la ruelle
+  const garland = svgEl("g", { class: "sway", style: "animation-duration:7s" }, lights);
+  svgEl("path", { d: "M845 455 Q1095 545 1345 420", stroke: "#0b0c10", "stroke-width": 2, fill: "none" }, garland);
+  for (let i = 1; i < 10; i++) {
+    const tt = i / 10, x = (1 - tt) ** 2 * 845 + 2 * (1 - tt) * tt * 1095 + tt ** 2 * 1345, y = (1 - tt) ** 2 * 455 + 2 * (1 - tt) * tt * 545 + tt ** 2 * 420;
+    svgEl("ellipse", { cx: x, cy: y + 10, rx: 7, ry: 9, fill: i % 2 ? "#ffb347" : "#ff6a4a", filter: "url(#glow)" }, garland);
+  }
+
+  // enseignes néon
+  const nz = $("neons");
+  const sign = (x, y, w, h, color, txt, fs, flick, delay) => {
+    const g = svgEl("g", flick ? { class: "neon-flicker", style: `animation-delay:${delay}s` } : {}, nz);
+    svgEl("rect", { x, y, width: w, height: h, rx: 4, fill: "#120a14", stroke: color, "stroke-width": 3, filter: "url(#glow)" }, g);
+    [...txt].forEach((c, i) => svgEl("text", { x: x + w / 2, y: y + fs * 1.15 * (i + 1) + 2, fill: color, "font-size": fs, "text-anchor": "middle", "font-family": "Zen Maru Gothic, sans-serif", filter: "url(#glow)" }, g, c));
+  };
+  sign(110, 470, 54, 170, "#ff7cc0", "深夜屋", 34, true, -2);
+  sign(1288, 300, 38, 165, "#ff4fa3", "カラオケ", 30, false);
+  sign(1226, 372, 28, 92, "#4fe0ff", "喫茶", 26, true, -3.5);
+  sign(1185, 420, 20, 56, "#ffd84f", "夜", 22, false);
+  sign(858, 330, 34, 150, "#ff8a3a", "ラーメン", 28, true, -1);
+  sign(938, 430, 22, 70, "#7dffb0", "バー", 20, false);
+
+  // produits miniatures dans le distributeur
+  const mp = $("mini-products");
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c++) {
+    const i = r * 6 + c, [type, body, label] = DRINKS[i];
+    const h = type === "pet" ? 26 : type === "slim" ? 22 : 18, w = type === "slim" ? 9 : 13;
+    const x = 640 + c * 22.5 + (22.5 - w) / 2, y = 590 + r * 36 - h;
+    svgEl("rect", { x, y, width: w, height: h, rx: 2, fill: body }, mp);
+    svgEl("rect", { x, y: y + h * .4, width: w, height: h * .3, fill: label }, mp);
+    if (c === 0) svgEl("rect", { x: 634, y: 590 + r * 36, width: 136, height: 3, fill: "#98a3b3" }, mp);
+  }
+  const bp = $("blue-products");
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 5; c++) svgEl("rect", { x: 502 + c * 18, y: 584 + r * 34, width: 10, height: 22, rx: 2, fill: `hsl(${(r * 5 + c) * 53 % 360} 60% 55%)` }, bp);
+}
+
+function fitScene() {
+  const a = innerWidth / innerHeight, svg = $("scene");
+  if (1000 * a < 1600) { const vw = 1000 * a, x0 = Math.max(0, Math.min(1600 - vw, 700 - vw / 2)); svg.setAttribute("viewBox", `${x0} 0 ${vw} 1000`); }
+  else { const vh = 1600 / a; svg.setAttribute("viewBox", `0 ${(1000 - vh) * .6} 1600 ${vh}`); }
+}
+
+/* ---------------- Le temps qui passe : 18h00 → 5h30 ---------------- */
+function lerpTable(table, x) {
+  let k = 0; while (k < table.length - 2 && x > table[k + 1][0]) k++;
+  const a = table[k], b = table[k + 1], f = Math.max(0, Math.min(1, (x - a[0]) / (b[0] - a[0])));
+  return a.slice(1).map((v, i) => typeof v === "number" ? v + (b[i + 1] - v) * f : mix(v, b[i + 1], f));
+}
+function mix(a, b, k) {
+  const pa = [1, 3, 5].map(i => parseInt(a.substr(i, 2), 16)), pb = [1, 3, 5].map(i => parseInt(b.substr(i, 2), 16));
+  return "#" + pa.map((v, i) => Math.round(v + (pb[i] - v) * k).toString(16).padStart(2, "0")).join("");
+}
+//          heure  ciel haut   ciel bas   voile      opacité  fenêtres  étoiles
+const TIME = [
+  [0.00, "#3d3a8f", "#ff9a5c", "#ff8a40", .14, .85, 0],
+  [0.13, "#25286e", "#d0607e", "#8a3a80", .12, .8, .2],
+  [0.30, "#0d1648", "#3a3c86", "#0a1238", .24, .7, .7],
+  [0.50, "#02030c", "#0b1130", "#000412", .40, .5, 1],
+  [0.75, "#000005", "#05091c", "#000208", .50, .15, 1],
+  [0.90, "#101a42", "#4a4a80", "#1a2450", .28, .22, .6],
+  [1.00, "#5f86c4", "#ffbe8a", "#ffb08a", .16, .3, 0]
+];
+function applyTime(day) {
+  const x = Math.max(0, Math.min(1, (day - 1) / 23));
+  const [top, bot, veil, veilOp, winFrac, starOp] = lerpTable(TIME, x);
+  $("sky-top").setAttribute("stop-color", top);
+  $("sky-bot").setAttribute("stop-color", bot);
+  $("ambient").setAttribute("fill", veil);
+  $("ambient").setAttribute("opacity", veilOp.toFixed(3));
+  $("stars").setAttribute("opacity", starOp.toFixed(2));
+  $("sun-dusk").setAttribute("opacity", Math.max(0, 1 - x / .22).toFixed(2));
+  $("sun-dawn").setAttribute("opacity", Math.max(0, (x - .84) / .16).toFixed(2));
+  // la lune traverse le ciel
+  const mx = (x - .1) / .8, moon = $("moon");
+  if (mx > 0 && mx < 1) {
+    moon.setAttribute("transform", `translate(${120 + mx * 1360} ${210 - Math.sin(Math.PI * mx) * 150})`);
+    moon.setAttribute("opacity", Math.min(1, Math.sin(Math.PI * mx) * 2.5).toFixed(2));
+  } else moon.setAttribute("opacity", 0);
+  // les fenêtres s'éteignent au fil de la nuit
+  WINDOWS.forEach(w => w.el.setAttribute("display", w.r < winFrac ? "inline" : "none"));
+  // les néons ressortent quand il fait noir
+  $("neons").setAttribute("opacity", (.65 + .35 * starOp).toFixed(2));
+  curWinFrac = winFrac; updateMsgBuilding();
+  snowing = day >= 24;
+  $("snowcover").setAttribute("display", snowing ? "inline" : "none");
+  Sound.setRainFactor(snowing ? .15 : 1);
+}
+
+/* =====================================================================
+   NAVIGATION
+   ===================================================================== */
+const wrap = $("scene-wrap");
+let inCloseup = false;
+function approach() {
+  if (inCloseup) return;
+  inCloseup = true;
+  Sound.beep();
+  const r = $("scene-machine").getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const s = Math.min(9, (innerHeight * .95) / r.height, (innerWidth * .95) / r.width);
+  wrap.style.transformOrigin = `${cx}px ${cy}px`;
+  wrap.style.transform = `translate(${innerWidth / 2 - cx}px, ${innerHeight / 2 - cy}px) scale(${s})`;
+  $("street-ui").classList.add("hidden");
+  setTimeout(() => { $("fade").style.opacity = 1; }, 850);
+  setTimeout(() => {
+    wrap.style.transform = `translate(${innerWidth / 2 - cx}px, ${innerHeight / 2 - cy}px) scale(${s * .55})`;
+    wrap.style.transition = "none"; wrap.style.filter = "blur(9px) brightness(.5)";
+    $("closeup").style.display = "block";
+    fitMachine();
+    requestAnimationFrame(() => { wrap.style.transition = ""; $("closeup").classList.add("show"); $("fade").style.opacity = 0; });
+    Sound.setMode("machine");
+  }, 1350);
+}
+function leave() {
+  $("closeup").classList.remove("show");
+  Sound.setMode("street");
+  setTimeout(() => {
+    $("closeup").style.display = "none";
+    wrap.style.transition = "none"; wrap.style.filter = ""; wrap.style.transform = "translate(0,0) scale(1.15)";
+    void wrap.offsetWidth; wrap.style.transition = ""; wrap.style.transform = "";
+    $("street-ui").classList.remove("hidden");
+    inCloseup = false;
+  }, 500);
+}
+$("scene-machine").addEventListener("click", approach);
+$("back").addEventListener("click", leave);
+function bubble(text, x, y, ms = 1500) {
+  const b = document.createElement("div"); b.className = "meow"; b.textContent = text;
+  b.style.left = x + "px"; b.style.top = y + "px"; b.style.animationDuration = ms + "ms";
+  document.body.appendChild(b); setTimeout(() => b.remove(), ms + 100);
+}
+function catSpot() { const r = $("cat").getBoundingClientRect(); return [r.left + r.width / 2, r.top - 10]; }
+$("cat").addEventListener("click", () => { Sound.meow(); bubble(t("meow"), ...catSpot()); });
+addEventListener("mousemove", e => {
+  if (inCloseup) return;
+  const r = $("cat").getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height * .3;
+  const dx = e.clientX - cx, dy = e.clientY - cy, d = Math.hypot(dx, dy) || 1;
+  $("cat-eyes").setAttribute("transform", `translate(${(dx / d * 1.6).toFixed(2)} ${(dy / d * 1.2).toFixed(2)})`);
+});
+// sanctuaire : tirer une prédiction
+$("shrine").addEventListener("click", () => {
+  Sound.suzu();
+  const roll = Math.random(), k = roll < .12 ? 0 : roll > .92 ? OMIKUJI.length - 1 : 1 + Math.floor(Math.random() * (OMIKUJI.length - 2));
+  const [kanji, read, text] = OMIKUJI[k];
+  $("ok-kanji").textContent = kanji; $("ok-read").textContent = read; $("ok-text").textContent = text;
+  setTimeout(() => { $("omikuji").hidden = false; }, 700);
+});
+$("omikuji").addEventListener("click", () => { $("omikuji").hidden = true; });
+// code secret et mots magiques
+function secret() {
+  secretUntil = Date.now() + 15000; updateMsgBuilding(); Sound.sparkle();
+  setTimeout(() => { Sound.meow(); bubble("✦", ...catSpot()); }, 600);
+  setTimeout(updateMsgBuilding, 15100);
+}
+function maggie() {
+  Sound.meow(); setTimeout(Sound.meow, 450);
+  const [x, y] = catSpot(); bubble(lang === "fr" ? "Maggie ?! Qu'est-ce que tu fais là ?" : "マギー？！", x, y, 2600);
+}
+addEventListener("resize", () => { if (!inCloseup) fitScene(); else fitMachine(); });
+
+/* Le distributeur prend toute la place disponible */
+function fitMachine() {
+  const vm = $("vm"), holder = $("vm-holder"), H = vm.offsetHeight, wide = innerWidth >= 900;
+  const availW = wide ? innerWidth - 310 - 32 - 60 : innerWidth - 24;
+  const availH = innerHeight - (TEST ? 150 : 90);
+  const s = wide ? Math.min(availW / 470, availH / H, 1.8) : Math.min(availW / 470, 1.4);
+  vm.style.transform = `scale(${s})`;
+  holder.style.width = 470 * s + "px"; holder.style.height = H * s + "px";
+}
+
+/* =====================================================================
+   LE DISTRIBUTEUR
+   ===================================================================== */
+const vm = $("vm"), flap = $("flap"), lcd = $("lcd"), hint = $("hint");
+let pendingDay = null, lcdKey = "welcome", lcdExtra = "";
+function setLcd(key, extra = "") { lcdKey = key; lcdExtra = extra; lcd.textContent = (key ? t(key) : "") + extra; }
+
+function buildLeds() {
+  const colors = ["#ff2d4b", "#4fe0ff", "#7dff9b", "#ffd76a", "#ff4fa3"];
+  ["leds-l", "leds-r"].forEach((id, side) => {
+    const el = $(id); el.innerHTML = "";
+    for (let i = 0; i < 9; i++) { const c = colors[(i + side * 2) % colors.length]; el.insertAdjacentHTML("beforeend", `<i style="background:${c};box-shadow:0 0 6px ${c};animation-delay:${-(i * .37 + side * .9)}s"></i>`); }
+  });
+}
+
+function renderMachine() {
+  const shelves = $("shelves"); shelves.innerHTML = "";
+  for (let r = 0; r < 4; r++) {
+    const shelf = document.createElement("div"); shelf.className = "shelf";
+    let prods = "", tags = "";
+    for (let c = 0; c < 6; c++) {
+      const day = r * 6 + c + 1;
+      const st = day > unlocked ? "locked" : state.opened.includes(day) ? "opened" : "available";
+      const label = st === "locked" ? t("locked") : st === "opened" ? t("sold") : t("push");
+      const tip = st === "locked" ? `Jour ${day} · le ${day} décembre` : st === "opened" ? `Jour ${day} · déjà bue` : `Jour ${day} · disponible !`;
+      prods += `<div class="product slot-${st}" data-day="${day}" data-tip="${tip}">${drinkSVG(day - 1)}</div>`;
+      tags += `<div class="slot-${st}"><button class="tag" data-day="${day}"><span class="num">${day}</span><span class="state">${label}</span><span class="led"></span></button></div>`;
+    }
+    shelf.innerHTML = `<div class="products">${prods}</div><div class="ledge"></div><div class="ledstrip"></div><div class="tags">${tags}</div>`;
+    shelves.appendChild(shelf);
+  }
+  shelves.querySelectorAll("[data-day]").forEach(el => el.addEventListener("click", e => { e.stopPropagation(); press(+el.dataset.day); }));
+  renderPanel();
+}
+
+$("shelves").addEventListener("mousemove", e => {
+  const el = e.target.closest("[data-tip]"), tip = $("tip");
+  if (!el) { tip.hidden = true; return; }
+  tip.textContent = el.dataset.tip; tip.style.left = e.clientX + "px"; tip.style.top = e.clientY + "px"; tip.hidden = false;
+});
+$("shelves").addEventListener("mouseleave", () => { $("tip").hidden = true; });
+function renderPanel() {
+  const opened = [...state.opened].sort((a, b) => a - b);
+  $("count").textContent = `${opened.length}/24`;
+  $("time-label").textContent = unlocked ? `${timeOf(Math.max(1, unlocked))} · ${momentOf(Math.max(1, unlocked))}` : "La machine dort encore";
+  const col = $("collection"); col.innerHTML = "";
+  if (!opened.length) col.innerHTML = `<div class="coll-empty">Rien pour l'instant. Appuie sur un bouton qui clignote.</div>`;
+  opened.forEach(day => {
+    const d = DAYS[day - 1], b = document.createElement("button");
+    b.className = "coll-item";
+    b.innerHTML = `${drinkSVG(day - 1, .55)}<div><div class="ci-day">Jour ${day} · ${timeOf(day)}</div><div class="ci-title">${escapeHtml(d.title)}</div><div class="ci-artist">${escapeHtml(d.artist)}</div></div>`;
+    b.onclick = () => openModal(day, false);
+    col.appendChild(b);
+  });
+  const box = $("fragments"); box.innerHTML = `<span class="fragments-label">Fragments du code</span>`;
+  FRAGMENTS.forEach((f, i) => {
+    const day = DAYS.findIndex(d => d.bonus && d.bonus.type === "fragment" && d.bonus.index === i) + 1, got = state.opened.includes(day);
+    box.insertAdjacentHTML("beforeend", `<div class="frag ${got ? "got" : ""}">${got ? escapeHtml(f) : "?"}</div>`);
+  });
+}
+
+function press(day) {
+  if (vm.classList.contains("broken")) return;
+  Sound.beep();
+  if (pendingDay) { hint.textContent = "Récupère d'abord ta boisson dans le bac."; return; }
+  if (day > unlocked) { setLcd("locked", ` · ${day}`); hint.textContent = "Pas encore. La machine est patiente, toi aussi."; return; }
+  if (state.opened.includes(day)) { openModal(day, false); return; }
+  const d = DAYS[day - 1];
+  if (d.bonus && d.bonus.type === "panne" && !state.repaired) { startBreakdown(day); return; }
+  dropCan(day);
+}
+
+function startBreakdown(day) {
+  vm.classList.add("broken"); setLcd("broken", " — HORS SERVICE");
+  hint.textContent = "La machine est en panne. Tape dessus.";
+  let taps = 0; const need = DAYS[day - 1].bonus.taps || 7;
+  const lines = ["…", "Encore.", "Plus fort.", "Ça bouge…", "Presque.", "Allez."];
+  const inner = $("vm-inner");
+  const onTap = e => {
+    e.stopPropagation(); taps++;
+    inner.classList.remove("shake"); void inner.offsetWidth; inner.classList.add("shake");
+    Sound.bang();
+    hint.textContent = lines[Math.min(taps - 1, lines.length - 1)];
+    if (taps >= need) {
+      vm.removeEventListener("click", onTap, true);
+      vm.classList.remove("broken"); state.repaired = true; save(STORE_KEY, state);
+      hint.textContent = "Réparée à coups de poing. Méthode validée par tous les techniciens.";
+      dropCan(day);
+    }
+  };
+  vm.addEventListener("click", onTap, true);
+}
+
+function dropCan(day) {
+  pendingDay = day; setLcd("clonk");
+  flap.querySelectorAll(".falling").forEach(c => c.remove());
+  const can = document.createElement("div"); can.className = "falling"; can.innerHTML = drinkSVG(day - 1, .9);
+  flap.appendChild(can);
+  setTimeout(() => { Sound.clank(); flap.classList.add("ready"); }, 520);
+}
+
+flap.addEventListener("click", () => {
+  if (!pendingDay) return;
+  const day = pendingDay; pendingDay = null;
+  flap.classList.remove("ready"); flap.querySelectorAll(".falling").forEach(c => c.remove());
+  if (!state.opened.includes(day)) { state.opened.push(day); save(STORE_KEY, state); }
+  setLcd("thanks"); renderMachine();
+  openModal(day, true);
+});
+
+/* =====================================================================
+   FENÊTRE DE LA BOISSON
+   ===================================================================== */
+function youtubeId(url) { if (!url) return ""; const m = url.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/); return m ? m[1] : (/^[\w-]{11}$/.test(url) ? url : ""); }
+function showVideo(v) {
+  const id = youtubeId(v.url);
+  if (id && location.protocol === "file:") {
+    $("m-player").innerHTML = `<div class="missing">YouTube bloque les vidéos quand la page est ouverte en double-cliquant sur le fichier (adresse en file:///).<br>Ouvre-la avec Live Server (adresse en http://…) ou en ligne : ça marchera tout seul.</div>`;
+    $("m-yt").innerHTML = `<a href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">L'ouvrir sur YouTube ↗</a>`;
+    return;
+  }
+  $("m-player").innerHTML = id ? `<iframe src="https://www.youtube-nocookie.com/embed/${id}" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="${escapeHtml(v.label)}"></iframe>` : `<div class="missing">Vidéo à venir (${escapeHtml(v.label)})</div>`;
+  $("m-yt").innerHTML = id ? `<a href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">La vidéo ne se lance pas ? L'ouvrir sur YouTube ↗</a>` : "";
+}
+let modalDay = null;
+function openModal(day, fresh) {
+  modalDay = day; const d = DAYS[day - 1];
+  Sound.setMode("quiet");
+  if (fresh) Sound.jingle();
+  $("m-day").textContent = `Jour ${day} · ${day} décembre`; $("m-time").textContent = timeOf(day);
+  $("m-tag").textContent = d.tag; $("m-title").textContent = d.title; fillRomaji();
+  $("m-artist").textContent = d.artist; $("m-info").textContent = d.info;
+  $("m-mot").hidden = !d.mot; $("m-mot").textContent = d.mot || "";
+  const tabs = $("m-tabs"); tabs.innerHTML = "";
+  if (d.videos.length > 1) d.videos.forEach((v, i) => {
+    const b = document.createElement("button"); b.className = "tab" + (i === 0 ? " active" : ""); b.textContent = v.label;
+    b.onclick = () => { tabs.querySelectorAll(".tab").forEach(x => x.classList.remove("active")); b.classList.add("active"); showVideo(v); };
+    tabs.appendChild(b);
+  });
+  showVideo(d.videos[0]);
+  const bonus = $("m-bonus"); bonus.innerHTML = "";
+  if ((d.bonus && d.bonus.type !== "panne") || d.final) {
+    const btn = document.createElement("button"); btn.className = "bonus-btn";
+    btn.textContent = d.final ? "Il reste quelque chose au fond du bac…" : "Il y a autre chose dans le bac…";
+    btn.onclick = () => {
+      btn.remove(); bonus.appendChild(bonusCard(d));
+      if (d.final) Sound.finale(); else if (d.bonus.type === "fragment") Sound.sparkle(); else Sound.jingle();
+    };
+    bonus.appendChild(btn);
+  }
+  $("modal").hidden = false;
+}
+function fillRomaji() {
+  if (!modalDay) return; const d = DAYS[modalDay - 1], el = $("m-romaji");
+  el.hidden = !d.romaji; el.textContent = d.romaji ? (lang === "fr" && d.fr ? `${d.romaji} · « ${d.fr} »` : d.romaji) : "";
+}
+function bonusCard(d) {
+  const el = document.createElement("div"); el.className = "bonus-card";
+  if (d.final) {
+    el.innerHTML = `<div class="paper">${escapeHtml(FINAL_MSG)}</div><p style="text-align:center;margin:16px 0 0;opacity:.8">Les quatre fragments, remis dans l'ordre :</p><div class="final-pass">${FRAGMENTS.map(escapeHtml).join("")}</div><p style="text-align:center;opacity:.8;font-size:14px">Garde-le précieusement. Il te servira demain.</p>`;
+    return el;
+  }
+  const b = d.bonus;
+  if (b.type === "fragment") el.innerHTML = `<div class="objet">Un bout de papier est collé sous la boisson.<br><span class="frag-big">${escapeHtml(FRAGMENTS[b.index])}</span><br>Fragment ${b.index + 1}/4. Ne le perds pas.</div>`;
+  else if (b.type === "mot") el.innerHTML = `<div class="paper">${escapeHtml(b.text)}</div>`;
+  else if (b.type === "bon") el.innerHTML = `<div class="ticket">${escapeHtml(b.text)}<small>${escapeHtml(b.small || "")}</small></div>`;
+  else if (b.type === "objet") el.innerHTML = `<div class="objet"><span class="emoji">${b.emoji}</span>${escapeHtml(b.text).replace(/\n/g, "<br>")}</div>`;
+  return el;
+}
+function escapeHtml(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function closeModal() {
+  $("modal").hidden = true; $("m-player").innerHTML = ""; modalDay = null;
+  Sound.setMode(inCloseup ? "machine" : "street");
+}
+$("close").onclick = closeModal;
+$("modal").addEventListener("click", e => { if (e.target.id === "modal") closeModal(); });
+const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
+let kIdx = 0, keyBuf = "";
+addEventListener("keydown", e => {
+  if (!$("intro").hidden) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("enter").click(); } return; }
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  kIdx = k === KONAMI[kIdx] ? kIdx + 1 : (k === KONAMI[0] ? 1 : 0);
+  if (kIdx === KONAMI.length) { kIdx = 0; secret(); }
+  if (e.key === "Escape") {
+    if (!$("omikuji").hidden) $("omikuji").hidden = true;
+    else if (!$("modal").hidden) closeModal();
+    else if (inCloseup) leave();
+    return;
+  }
+  if (!$("modal").hidden || !$("omikuji").hidden) return;
+  if ((e.key === "Enter" || e.key === " ") && !inCloseup && e.target === document.body) { e.preventDefault(); approach(); return; }
+  if (k === "s") $("mute").click();
+  if (k === "l") $("lang").click();
+  if (e.key.length === 1) {
+    keyBuf = (keyBuf + k).slice(-12);
+    if (keyBuf.endsWith("maggie")) { keyBuf = ""; maggie(); }
+    else if (keyBuf.endsWith("nya")) { keyBuf = ""; Sound.meow(); bubble(t("meow"), ...catSpot()); }
+  }
+});
+
+/* ---------------- Langue & son ---------------- */
+function applyLang() {
+  $("lang").innerHTML = t("btn");
+  document.querySelectorAll("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
+  if (lcdKey) setLcd(lcdKey, lcdExtra);
+  renderMachine(); fillRomaji();
+  if (inCloseup) fitMachine();
+}
+$("lang").addEventListener("click", () => { lang = lang === "jp" ? "fr" : "jp"; save("ag-lang", lang); applyLang(); });
+const muteLabel = () => { $("mute").textContent = Sound.isMuted() ? "🔇" : "🔊"; };
+$("mute").addEventListener("click", () => { Sound.init(); Sound.toggleMute(); muteLabel(); });
+
+/* ---------------- Pluie ---------------- */
+(function rain() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = $("rain"), ctx = c.getContext("2d"); let drops = [];
+  function resize() { c.width = innerWidth; c.height = innerHeight; drops = Array.from({ length: Math.round(innerWidth / 7) }, () => ({ x: Math.random() * c.width, y: Math.random() * c.height, l: 10 + Math.random() * 16, s: 7 + Math.random() * 7 })); }
+  resize(); addEventListener("resize", resize);
+  const flakes = Array.from({ length: 160 }, () => ({ x: Math.random(), y: Math.random(), r: .8 + Math.random() * 2.2, s: .4 + Math.random() * .9, p: Math.random() * 6.28 }));
+  (function frame() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    if (snowing) {
+      ctx.fillStyle = inCloseup ? "rgba(255,255,255,.45)" : "rgba(255,255,255,.85)";
+      for (const f of flakes) {
+        f.y += f.s / c.height * 1.6; f.p += .02; if (f.y > 1.02) { f.y = -.02; f.x = Math.random(); }
+        ctx.beginPath(); ctx.arc(f.x * c.width + Math.sin(f.p) * 12, f.y * c.height, f.r, 0, 6.28); ctx.fill();
+      }
+      requestAnimationFrame(frame); return;
+    }
+    ctx.strokeStyle = inCloseup ? "rgba(180,200,255,.12)" : "rgba(180,200,255,.2)"; ctx.lineWidth = 1; ctx.beginPath();
+    for (const d of drops) { ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - 2, d.y + d.l); d.y += d.s; d.x -= .6; if (d.y > c.height) { d.y = -d.l; d.x = Math.random() * c.width; } }
+    ctx.stroke(); requestAnimationFrame(frame);
+  })();
+})();
+
+/* ---------------- Mise à jour du jour ---------------- */
+function refreshDay() {
+  const day = Math.max(1, unlocked);
+  applyTime(day);
+  if (unlocked === 0) {
+    $("clock-time").textContent = "--:--";
+    const days = Math.max(1, Math.ceil((new Date(YEAR, 11, 1) - new Date()) / 86400000));
+    $("clock-sub").textContent = `La machine s'allume le 1er décembre · encore ${days} jour${days > 1 ? "s" : ""}`;
+    setLcd("sleep"); hint.textContent = "Elle dort encore. Reviens le 1er décembre.";
+  } else {
+    $("clock-time").textContent = timeOf(day);
+    $("clock-sub").textContent = `${day} décembre · ${momentOf(day)}`;
+    setLcd("welcome");
+    const fresh = DAYS.some((_, i) => i < unlocked && !state.opened.includes(i + 1));
+    hint.textContent = fresh ? "Une boisson t'attend. Appuie sur un bouton qui clignote." : "Tout est bu pour aujourd'hui. Reviens demain.";
+  }
+  renderMachine();
+}
+
+if (TEST) {
+  $("testbar").hidden = false; document.body.classList.add("testing");
+  const upd = () => { $("t-day").textContent = `${unlocked} déc.`; refreshDay(); };
+  $("t-prev").onclick = () => { unlocked = Math.max(1, unlocked - 1); upd(); };
+  $("t-next").onclick = () => { unlocked = Math.min(24, unlocked + 1); upd(); };
+  $("t-reset").onclick = () => { state = { opened: [], repaired: false }; save(STORE_KEY, state); upd(); };
+  $("t-day").textContent = `${unlocked} déc.`;
+}
+
+/* ---------------- Entrée ---------------- */
+$("intro-sub").textContent = INTRO_TEXT;
+$("enter").addEventListener("click", () => {
+  Sound.init(); Sound.setMode("street");
+  $("intro").classList.add("gone"); setTimeout(() => $("intro").hidden = true, 900);
+});
+
+buildStreet();
+buildSnow();
+document.querySelectorAll("#neons > g").forEach(g => g.addEventListener("mouseenter", () => Sound.buzz()));
+fitScene(); buildLeds(); refreshDay(); applyLang(); muteLabel();
+if (document.fonts) document.fonts.ready.then(() => { if (inCloseup) fitMachine(); });
+</script>
+</body>
+</html>
