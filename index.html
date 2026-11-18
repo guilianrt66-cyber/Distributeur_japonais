@@ -188,7 +188,10 @@
   /* ---------- Barre de test ---------- */
   .testbar { position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 70; background: #ffd76a; color: #2a1d00; border-radius: 30px; padding: 6px 8px; display: flex; gap: 6px; align-items: center; font-size: 13px; font-weight: 700; box-shadow: 0 4px 20px rgba(0,0,0,.6); white-space: nowrap; }
   .testbar button { border: none; background: #2a1d00; color: #ffd76a; border-radius: 20px; padding: 5px 10px; cursor: pointer; font-weight: 700; }
-  .testbar .d { min-width: 64px; text-align: center; }
+  .testbar .d { min-width: 74px; text-align: center; }
+  .t-grid { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); background: #ffd76a; border-radius: 14px; padding: 10px; display: grid; grid-template-columns: repeat(6, 38px); gap: 6px; box-shadow: 0 4px 20px rgba(0,0,0,.6); }
+  .t-grid button { padding: 7px 0 !important; border-radius: 8px !important; font-family: "DotGothic16", monospace; font-size: 14px; }
+  .t-grid button.cur { background: #d6203f !important; color: #fff !important; }
 
   /* ---------- Détails animés de la ruelle ---------- */
   .drift { animation: drift linear infinite; }
@@ -552,7 +555,8 @@
 <div class="tip" id="tip" hidden></div>
 
 <div class="testbar" id="testbar" hidden>
-  🧪 <button id="t-prev">◀</button><span class="d" id="t-day"></span><button id="t-next">▶</button><button id="t-reset">Vider</button>
+  🧪 <button id="t-prev">◀</button><button class="d" id="t-day" title="Choisir un jour"></button><button id="t-next">▶</button><button id="t-reset">Vider</button>
+  <div class="t-grid" id="t-grid" hidden></div>
 </div>
 
 <script>
@@ -595,6 +599,9 @@ const MUSIC_FILES = {
 };
 
 const INTRO_TEXT = "24 nuits, 24 boissons. Une par jour, pas plus. TODO : ton petit mot d'accueil.";
+
+// 🔑 Mot secret du mode test : ajoute ?coulisses à la fin du lien (change-le si tu veux, sans espaces ni accents)
+const TEST_KEY = "coulisses";
 
 const YEAR = 2026;
 const FRAGMENTS = ["???", "???", "???", "???"];   // mot de passe du light novel (jours 3, 11, 15, 20)
@@ -721,7 +728,7 @@ const I18N = {
 
 /* ---------------- État ---------------- */
 const params = new URLSearchParams(location.search);
-const TEST = params.has("test");
+const TEST = params.has(TEST_KEY);
 const STORE_KEY = "ag-jihanki-2026" + (TEST ? "-test" : "");
 function load(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
 function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
@@ -736,7 +743,7 @@ function realUnlocked() {
   if (y < YEAR || m < 11) return 0;
   return Math.min(d, 24);
 }
-let unlocked = TEST ? Math.max(1, Math.min(24, parseInt(params.get("test"), 10) || 1)) : realUnlocked();
+let unlocked = TEST ? Math.max(1, Math.min(24, parseInt(params.get(TEST_KEY), 10) || 1)) : realUnlocked();
 function timeOf(day) { const min = 18 * 60 + (day - 1) * 30, h = Math.floor(min / 60) % 24, mm = min % 60; return `${String(h).padStart(2, "0")}:${String(mm).padStart(2, "0")}`; }
 function momentOf(day) {
   if (day >= 24) return "L'aube";
@@ -1598,11 +1605,19 @@ function refreshDay() {
 
 if (TEST) {
   $("testbar").hidden = false; document.body.classList.add("testing");
-  const upd = () => { $("t-day").textContent = `${unlocked} déc.`; refreshDay(); };
+  const upd = () => { $("t-day").textContent = `${unlocked} déc. ▾`; $("t-grid").querySelectorAll("button").forEach(b => b.classList.toggle("cur", +b.textContent === unlocked)); refreshDay(); };
+  for (let d = 1; d <= 24; d++) {
+    const b = document.createElement("button"); b.textContent = d;
+    b.onclick = e => { e.stopPropagation(); unlocked = d; $("t-grid").hidden = true; upd(); };
+    $("t-grid").appendChild(b);
+  }
+  $("t-day").onclick = e => { e.stopPropagation(); $("t-grid").hidden = !$("t-grid").hidden; };
+  document.addEventListener("click", () => { $("t-grid").hidden = true; });
   $("t-prev").onclick = () => { unlocked = Math.max(1, unlocked - 1); upd(); };
   $("t-next").onclick = () => { unlocked = Math.min(24, unlocked + 1); upd(); };
   $("t-reset").onclick = () => { state = { opened: [], repaired: false }; save(STORE_KEY, state); upd(); };
-  $("t-day").textContent = `${unlocked} déc.`;
+  $("t-day").textContent = `${unlocked} déc. ▾`;
+  $("t-grid").querySelectorAll("button").forEach(b => b.classList.toggle("cur", +b.textContent === unlocked));
 }
 
 /* ---------------- Entrée ---------------- */
